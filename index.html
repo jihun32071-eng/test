@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>산길 난이도 도감</title>
+<meta name="description" content="국내 산 39곳의 등산 코스 58개를 하나의 난이도 지수로 환산해 비교하는 자료집.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <canvas id="contour" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <p class="brand">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M1 15h16L11.5 4 8.4 9.6 6.2 6.5 1 15Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      산길 난이도 도감
+    </p>
+
+    <h1>어느 산이 더 힘든가</h1>
+    <p class="lede">
+      높이만으로는 알 수 없습니다. 296m 아차산과 809m 월출산의 차이는 표고가 아니라
+      <strong>거리 · 누적 상승고도 · 지형</strong>에서 갈립니다. 국내 산 39곳의 대표 코스를
+      같은 공식으로 환산해 한 줄에 세웠습니다.
+    </p>
+
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 등급 체계 -->
+  <section class="section" id="scale">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">난이도 등급</p>
+        <h2>지수 하나로 다섯 등급</h2>
+        <p>거리와 누적 상승고도를 하나의 수로 합친 뒤, 길바닥 상태에 따라 보정합니다. 같은 잣대를 쓰기 때문에 지역이 다른 산끼리도 비교할 수 있습니다.</p>
+      </div>
+
+      <div class="grade-band" id="gradeBand"></div>
+
+      <div class="formula-grid">
+        <div class="panel">
+          <h3>난이도 지수 계산식</h3>
+          <p class="formula">지수 = √( 2 × 누적상승(m) × 거리(km) ) × 지형계수</p>
+          <ul>
+            <li><b>거리</b> — 들머리부터 날머리까지 총 이동 거리. 왕복 코스는 왕복 전체.</li>
+            <li><b>누적 상승고도</b> — 오르막 구간의 고도 상승분 합계. 표고차가 아니라 오르내림을 모두 더한 값이라 능선 코스일수록 커집니다.</li>
+            <li><b>지형계수</b> — 손을 쓰는 구간, 계단, 위험 구간에 대한 보정.</li>
+          </ul>
+          <ul>
+            <li><b>예상 소요시간</b> = ( 거리 ÷ 3km/h + 누적상승 ÷ 450m/h ) × 지형 보정. 휴식과 식사 시간을 포함한 일반 등산객 기준입니다.</li>
+          </ul>
+        </div>
+
+        <div class="panel">
+          <h3>지형계수</h3>
+          <table class="terrain" id="terrainTable">
+            <thead><tr><th>지형</th><th>설명</th><th>계수</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 계산기 -->
+  <section class="section" id="calc">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">직접 계산</p>
+        <h2>가려는 코스의 등급 확인</h2>
+        <p>지도 앱이나 탐방로 안내판에서 거리와 누적 상승고도를 확인해 넣어 보세요. 아래 값은 북한산 백운대 왕복 코스입니다.</p>
+      </div>
+
+      <div class="calc">
+        <div class="panel">
+          <div class="field">
+            <label for="in-dist">총 거리 (km)</label>
+            <input type="number" id="in-dist" value="8.6" min="0.2" max="80" step="0.1" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="in-gain">누적 상승고도 (m)</label>
+            <input type="number" id="in-gain" value="780" min="10" max="5000" step="10" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label for="in-terrain">지형</label>
+            <select id="in-terrain"></select>
+          </div>
+        </div>
+
+        <div class="panel readout" id="readout">
+          <div class="readout-top">
+            <div>
+              <p class="eyebrow" style="margin-bottom:.2rem">난이도 지수</p>
+              <p class="score" id="calc-score">0<small id="calc-grade">—</small></p>
+            </div>
+            <div class="est">
+              <b id="calc-time">—</b>
+              <span>예상 소요시간</span>
+            </div>
+          </div>
+
+          <div class="ruler" id="calc-ruler">
+            <div class="ruler-track"></div>
+            <div class="ruler-mark"></div>
+            <div class="ruler-ticks"><span>0</span><span>50</span><span>90</span><span>150</span><span>220</span><span>300+</span></div>
+          </div>
+
+          <p class="note" id="calc-note"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 목록 -->
+  <section class="section" id="list">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">산 목록</p>
+        <h2 id="list-heading">산 목록</h2>
+        <p>카드의 등급은 그 산의 <strong>대표(가장 쉬운) 코스</strong> 기준입니다. 산을 누르면 코스별 수치를 볼 수 있습니다.</p>
+      </div>
+
+      <div class="toolbar">
+        <div class="field grow">
+          <label for="q">검색</label>
+          <input type="search" id="q" placeholder="산 이름 또는 지역" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="sort">정렬</label>
+          <select id="sort">
+            <option value="idx-asc">난이도 낮은 순</option>
+            <option value="idx-desc">난이도 높은 순</option>
+            <option value="elev-desc">표고 높은 순</option>
+            <option value="elev-asc">표고 낮은 순</option>
+            <option value="name">이름순</option>
+          </select>
+        </div>
+        <div class="field grow">
+          <label id="lbl-region">지역</label>
+          <div class="chips" id="regionChips" role="group" aria-labelledby="lbl-region"></div>
+        </div>
+        <div class="field grow">
+          <label id="lbl-grade">등급</label>
+          <div class="chips" id="gradeChips" role="group" aria-labelledby="lbl-grade"></div>
+        </div>
+      </div>
+
+      <div class="result-line">
+        <span><b id="count">0</b>개 산</span>
+        <button type="button" class="linkish" id="reset">필터 초기화</button>
+      </div>
+
+      <div class="grid" id="grid"></div>
+      <p class="empty" id="empty" hidden>조건에 맞는 산이 없습니다. 필터를 넓혀 보세요.</p>
+    </div>
+  </section>
+
+  <!-- 가이드 -->
+  <section class="section" id="guide">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">준비</p>
+        <h2>등급별로 달라지는 것</h2>
+      </div>
+
+      <div class="guide">
+        <section>
+          <h3>입문 · 초급</h3>
+          <ul>
+            <li>운동화로도 가능하지만 접지력 있는 신발이 안전합니다.</li>
+            <li>물 500ml~1L, 간식 하나면 충분합니다.</li>
+            <li>일몰 1시간 전에는 하산을 마치도록 계획하세요.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>중급</h3>
+          <ul>
+            <li>발목을 잡아주는 등산화와 스틱을 권합니다. 무릎 부담은 하산에서 생깁니다.</li>
+            <li>물 1.5L 이상, 행동식 별도. 여름에는 염분 보충도 필요합니다.</li>
+            <li>능선은 체감온도가 5~10도 낮습니다. 바람막이를 배낭에 넣어 두세요.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>상급 · 최상급</h3>
+          <ul>
+            <li>헤드랜턴, 보조 배터리, 비상식량, 응급처치 용품은 기본입니다.</li>
+            <li>국립공원은 계절별 입산 통제 시각이 있습니다. 통제 시각을 기준으로 역산해 출발하세요.</li>
+            <li>탈출로가 없는 능선 코스는 되돌아설 지점과 시각을 미리 정해 둡니다.</li>
+            <li>단독 산행은 피하고, 산행 계획을 다른 사람에게 알립니다.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>지수를 읽을 때 주의</h3>
+          <ul>
+            <li>지수는 <b>맑은 날, 여름·가을</b>을 전제로 합니다. 눈과 얼음은 같은 코스의 난도를 한 단계 이상 끌어올립니다.</li>
+            <li>암릉 구간의 심리적 부담과 고소공포는 수치로 담기지 않습니다.</li>
+            <li>단풍철·철쭉철에는 정체 때문에 실제 소요시간이 크게 늘어납니다.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><strong>수치는 근사값입니다.</strong> 거리·누적 상승고도는 공개된 탐방로 정보와 일반적인 산행 기록을 참고해 정리한 값으로, 측정 기기와 실제 경로에 따라 달라집니다. 난이도 지수는 산끼리 비교하기 위한 상대적 척도이며 안전을 보장하지 않습니다.</p>
+    <p>산행 전에는 <a href="https://www.knps.or.kr" target="_blank" rel="noopener">국립공원공단</a>의 탐방로 개방 여부·통제 시각과 기상 정보를 반드시 확인하세요. 산악사고 신고는 119입니다.</p>
+    <div class="row">
+      <span>난이도 지수: 거리·누적 상승고도 기반 산정(미국 셰넌도어 국립공원 방식을 미터법으로 변형)</span>
+    </div>
+  </div>
+</footer>
+
+<dialog id="sheet" aria-labelledby="sheet-title"></dialog>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
