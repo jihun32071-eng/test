@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>군자역 등산 커리큘럼</title>
+<meta name="description" content="아차산에서 시작해 한라산까지, 군자역 기준으로 짠 8단계 등산 훈련 계획.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hahmlet:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <canvas id="contour" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <p class="brand">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+        <path d="M1 15h16L11.5 4 8.4 9.6 6.2 6.5 1 15Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      군자역 등산 커리큘럼
+      <a class="brand-link" href="index.html">전체 산 목록 →</a>
+    </p>
+
+    <h1>아차산에서 한라산까지</h1>
+    <p class="lede">
+      지금 서 있는 곳은 지수 <strong>42</strong>, 아차산 왕복입니다. 한라산 성판악은 <strong>250</strong>입니다.
+      그 사이를 여덟 계단으로 나눴습니다. 한 계단에 지수를 <strong>40 이상 올리지 않는 것</strong>이 이 계획의 유일한 규칙입니다.
+    </p>
+
+    <div class="stats" id="progress-stats"></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 진행 사다리 -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">전체 지도</p>
+        <h2>여덟 계단</h2>
+        <p>각 단계에서 가장 어려운 코스를 같은 눈금(난이도 지수)에 올린 그림입니다. 체크한 코스가 있으면 현재 최고 기록이 세로선으로 표시됩니다.</p>
+      </div>
+      <div class="ladder" id="ladder"></div>
+    </div>
+  </section>
+
+  <!-- 진급 규칙 -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">진급 규칙</p>
+        <h2>다음 단계로 넘어가는 조건</h2>
+      </div>
+      <div class="rules">
+        <div class="panel rule">
+          <p class="rule-n">규칙 1</p>
+          <h3>지수 +40 이내</h3>
+          <p>이전에 완주한 최고 지수보다 40 넘게 높은 코스는 건너뛴 것입니다. 사고와 부상은 대부분 이 지점에서 납니다.</p>
+        </div>
+        <div class="panel rule">
+          <p class="rule-n">규칙 2</p>
+          <h3>같은 단계 반복</h3>
+          <p>한 번 올랐다고 그 단계를 통과한 것이 아닙니다. 단계마다 정해진 횟수를 채우고, 두 번째부터 여유가 생겨야 넘어갑니다.</p>
+        </div>
+        <div class="panel rule">
+          <p class="rule-n">규칙 3</p>
+          <h3>다음 날로 판정</h3>
+          <p>산에서가 아니라 다음 날 아침에 판정합니다. 계단을 정상적으로 내려갈 수 없으면 아직 그 단계입니다. 한 계단 내려가 반복하세요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 페이스와 일정 -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">일정</p>
+        <h2>산에 가는 빈도를 고르면 시기가 계산됩니다</h2>
+        <p id="pace-summary">주 1회 기준입니다.</p>
+      </div>
+      <div class="chips" id="paceChips" role="group" aria-label="산행 빈도"></div>
+    </div>
+  </section>
+
+  <!-- 단계 -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">단계별 계획</p>
+        <h2>0단계부터 7단계까지</h2>
+        <p>다녀온 코스를 체크하면 진행 상황이 저장됩니다. 각 코스의 거리·누적 상승·예상 시간은 산 목록과 같은 데이터에서 계산됩니다.</p>
+        <p class="sync-note" id="sync-note">이 브라우저에 저장됩니다.</p>
+      </div>
+      <div class="stages" id="stages"></div>
+    </div>
+  </section>
+
+  <!-- 평일 루틴 -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">평일</p>
+        <h2>집 앞이 훈련장이라는 것</h2>
+        <p>아차산역이 한 정거장 거리라는 건 이 계획에서 가장 큰 자산입니다. 주말 산행 하나로는 체력이 잘 늘지 않습니다.</p>
+      </div>
+      <div class="guide">
+        <section>
+          <h3>주중 1회, 1시간</h3>
+          <ul>
+            <li>퇴근 후 아차산역 → 정상 → 아차산역. 왕복 1시간 30분이면 충분합니다.</li>
+            <li>해가 짧은 계절에는 헤드랜턴을 챙기고, 능선까지만 다녀와도 됩니다.</li>
+            <li>목표는 정상이 아니라 <b>주 2회 이상 다리를 쓰는 것</b>입니다.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>배낭에 무게 넣기</h3>
+          <ul>
+            <li>2단계부터는 물 2L를 넣고 아차산을 오릅니다. 실제 산행 배낭 무게에 미리 적응합니다.</li>
+            <li>5단계를 준비할 땐 5~7kg까지 올립니다. 무게는 천천히, 한 번에 1kg씩.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>하산 근력</h3>
+          <ul>
+            <li>부상은 대부분 내려올 때 납니다. 아차산 내리막에서 보폭을 줄이고 천천히 내려오는 연습을 합니다.</li>
+            <li>계단을 뛰어 내려가지 않습니다. 무릎이 아프면 스틱을 먼저 씁니다.</li>
+          </ul>
+        </section>
+        <section>
+          <h3>기록하기</h3>
+          <ul>
+            <li>같은 코스(아차산 왕복)의 시간을 매번 적어 둡니다. 체력 변화를 보여주는 가장 정확한 지표입니다.</li>
+            <li>시간이 줄지 않으면 단계를 올릴 때가 아닙니다.</li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p><strong>이 계획은 참고용입니다.</strong> 나이·체중·기저질환·무릎 상태에 따라 적정 속도는 크게 다릅니다. 통증이 있으면 단계를 올리지 말고, 필요하면 의료진과 상의하세요. 지수와 예상 시간은 근사값이며 안전을 보장하지 않습니다.</p>
+    <p>산행 전 <a href="https://www.knps.or.kr" target="_blank" rel="noopener">국립공원공단</a>에서 탐방로 개방 여부와 입산 통제 시각을, 기상청에서 날씨를 확인하세요. 산악사고 신고는 119입니다.</p>
+    <p>이동 시간은 군자역 출발 기준 대략치입니다. 실제 배차와 환승 시간에 따라 달라집니다.</p>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/calc.js"></script>
+<script src="assets/js/curriculum.js"></script>
+<script src="assets/js/curriculum-app.js"></script>
+</body>
+</html>

@@ -417,6 +417,19 @@ dialog::backdrop { background: rgba(8, 16, 13, .55); backdrop-filter: blur(2px);
 .figures dd { margin: 0; font-family: var(--mono); font-size: var(--step-0); }
 .course .note { font-size: var(--step--1); color: var(--ink-2); }
 
+.access {
+  display: flex; align-items: baseline; gap: .6rem; flex-wrap: wrap;
+  font-size: var(--step--1);
+  padding: .6rem .85rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+  border-radius: 0 6px 6px 0;
+}
+.access-label {
+  font-size: .72rem; font-weight: 500; letter-spacing: .03em;
+  color: var(--accent); white-space: nowrap;
+}
+
 .disclaimer {
   font-size: var(--step--1); color: var(--ink-2);
   background: var(--surface-2); border-radius: 8px; padding: .9rem 1.1rem;
@@ -455,3 +468,171 @@ footer.site .row { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin-to
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
   .card:hover { transform: none; }
 }
+
+/* ── 커리큘럼 페이지 ─────────────────────────────────── */
+.brand-link {
+  margin-left: auto;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.brand-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* 진행 사다리 */
+.ladder { --lab: 9.5rem; --val: 3rem; --gap: .75rem; }
+.ladder-axis {
+  position: relative;
+  height: 1.2rem;
+  margin-left: calc(var(--lab) + var(--gap));
+  margin-right: calc(var(--val) + var(--gap));
+  font-family: var(--mono);
+  font-size: .7rem;
+  color: var(--ink-3);
+}
+.ladder-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.ladder-axis span:first-child { left: 0; transform: none; }
+.ladder-axis span:last-child { transform: translateX(-100%); }
+
+.ladder-rows {
+  position: relative;
+  display: flex; flex-direction: column; gap: .35rem;
+  padding: .5rem 0 1.6rem;
+}
+.ladder-grid {
+  position: absolute; top: 0; bottom: 0;
+  left: calc(var(--lab) + var(--gap));
+  right: calc(var(--val) + var(--gap));
+  pointer-events: none;
+}
+.ladder-grid .gridline { position: absolute; top: 0; bottom: 1.6rem; width: 1px; background: var(--line); }
+.ladder-grid .bestline { position: absolute; top: 0; bottom: 1.6rem; width: 2px; background: var(--ink); opacity: .75; }
+.ladder-grid .bestline-tag {
+  position: absolute; bottom: 0;
+  transform: translateX(-50%);
+  font-family: var(--mono); font-size: .7rem;
+  color: var(--on-accent); background: var(--ink);
+  padding: .1rem .4rem; border-radius: 3px; white-space: nowrap;
+}
+
+.ladder-row {
+  display: grid;
+  grid-template-columns: var(--lab) 1fr var(--val);
+  gap: var(--gap);
+  align-items: center;
+}
+.ladder-name { display: flex; align-items: baseline; gap: .45rem; min-width: 0; }
+.ladder-name b {
+  font-family: var(--mono); font-weight: 500;
+  color: var(--tone);
+  width: 1.1rem; flex: none;
+}
+.ladder-name span {
+  font-size: var(--step--1); color: var(--ink-2);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ladder-track { height: 14px; background: var(--surface-2); border-radius: 3px; position: relative; }
+.ladder-bar { position: absolute; inset: 0 auto 0 0; background: var(--tone); border-radius: 3px; }
+.ladder-bar.is-capped {
+  border-radius: 3px 0 0 3px;
+  -webkit-mask-image: linear-gradient(90deg, #000 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 92%, transparent 100%);
+}
+.ladder-val { font-size: var(--step--1); color: var(--ink-2); text-align: right; }
+.ladder-row.is-done .ladder-name span { color: var(--ink); font-weight: 500; }
+.ladder-row.is-done .ladder-track { box-shadow: inset 0 0 0 1px var(--tone); }
+
+/* 진급 규칙 */
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+.rule .rule-n {
+  font-family: var(--mono); font-size: .75rem; letter-spacing: .06em;
+  color: var(--accent); margin-bottom: .3rem;
+}
+.rule h3 { font-size: var(--step-1); margin-bottom: .5rem; }
+.rule p { font-size: var(--step--1); color: var(--ink-2); }
+
+.sync-note { margin-top: .5rem; font-size: var(--step--1); color: var(--ink-3); }
+
+/* 단계 카드 */
+.stages { display: flex; flex-direction: column; gap: 1rem; }
+.stage {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--tone);
+  border-radius: 8px;
+  padding: 1.35rem 1.5rem 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.stage.is-done { border-color: var(--tone); background: var(--tone-bg); }
+.stage-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  padding-bottom: .9rem; border-bottom: 1px solid var(--line);
+}
+.stage-id { display: flex; align-items: baseline; gap: .75rem; }
+.stage-id b {
+  font-family: var(--mono); font-size: var(--step-3); font-weight: 500;
+  color: var(--tone); line-height: 1;
+}
+.stage-id h3 { font-size: var(--step-2); }
+.stage-meta { display: flex; flex-direction: column; align-items: flex-end; gap: .15rem; text-align: right; }
+.stage-when { font-size: var(--step--1); font-weight: 500; }
+.stage-count { font-size: .75rem; color: var(--ink-3); }
+.stage-goal { color: var(--ink-2); max-width: 62ch; }
+.stage-jump { font-family: var(--mono); font-size: .75rem; color: var(--ink-3); }
+.stage-jump.is-warn {
+  font-family: var(--sans); font-size: var(--step--1);
+  color: var(--d5); background: var(--d5-bg);
+  padding: .55rem .8rem; border-radius: 6px; line-height: 1.5;
+}
+.stage-winter {
+  font-size: var(--step--1); color: var(--d2);
+  background: var(--d2-bg); padding: .55rem .8rem; border-radius: 6px; line-height: 1.5;
+}
+
+/* 목표 코스 */
+.targets { display: flex; flex-direction: column; gap: .5rem; }
+.target {
+  display: flex; gap: .75rem; align-items: flex-start;
+  padding: .75rem .9rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.target:hover { border-color: var(--line-2); }
+.target input { margin: .25rem 0 0; width: 1.05rem; height: 1.05rem; accent-color: var(--accent); flex: none; cursor: pointer; }
+.target.is-done { border-color: var(--tone); }
+.target.is-done .target-head b { text-decoration: line-through; text-decoration-color: var(--line-2); }
+.target-main { display: flex; flex-direction: column; gap: .3rem; min-width: 0; flex: 1; }
+.target-head { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.target-head b { font-size: var(--step-1); font-family: var(--serif); font-weight: 600; }
+.target-course { font-size: var(--step--1); color: var(--ink-2); }
+.target-figs { font-size: var(--step--1); color: var(--ink-3); }
+.target-access, .target-note, .target-when { font-size: var(--step--1); color: var(--ink-2); }
+.target-access { display: flex; gap: .5rem; flex-wrap: wrap; align-items: baseline; }
+.target-note { color: var(--ink-3); }
+.target-when { font-family: var(--mono); font-size: .72rem; color: var(--accent); }
+
+/* 단계 하단 3열 */
+.stage-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem 1.5rem; }
+.stage-col h4 {
+  margin: 0 0 .5rem; font-size: .78rem; font-weight: 500;
+  color: var(--ink-3); letter-spacing: .02em;
+  padding-bottom: .35rem; border-bottom: 1px solid var(--line);
+}
+.stage-col ul { margin: 0; padding-left: 1.05rem; font-size: var(--step--1); color: var(--ink-2); }
+.stage-col li + li { margin-top: .3rem; }
+
+@media (max-width: 720px) {
+  .ladder { --lab: 6.5rem; --val: 2.4rem; --gap: .5rem; }
+  .ladder-name span { font-size: .75rem; }
+  .stage { padding: 1.1rem 1.1rem 1.25rem; }
+  .stage-meta { align-items: flex-start; text-align: left; }
+}
+
+.stage-rest {
+  border-left-color: var(--d2);
+  background: var(--surface);
+  border-style: dashed;
+}
+.stage-rest .stage-id b { color: var(--d2); font-family: var(--sans); font-size: var(--step-2); }

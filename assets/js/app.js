@@ -2,55 +2,11 @@
 (function () {
   "use strict";
 
-  /* ── 계산 ─────────────────────────────────────────── */
-  function difficulty(dist, gain, terrain) {
-    var f = (TERRAIN[terrain] || TERRAIN.earth).factor;
-    return Math.sqrt(2 * gain * dist) * f;
-  }
+  var HC = window.HikeCalc;
+  var difficulty = HC.difficulty, hours = HC.hours, gradeOf = HC.gradeOf;
+  var fmtTime = HC.fmtTime, rulerPos = HC.rulerPos;
 
-  function hours(dist, gain, terrain) {
-    var f = (TERRAIN[terrain] || TERRAIN.earth).factor;
-    return (dist / 3 + gain / 450) * (1 + (f - 1) / 2);
-  }
-
-  function gradeOf(idx) {
-    for (var i = 0; i < GRADES.length; i++) {
-      if (idx < GRADES[i].max) return GRADES[i];
-    }
-    return GRADES[GRADES.length - 1];
-  }
-
-  function fmtTime(h) {
-    var total = Math.round(h * 60);
-    var hh = Math.floor(total / 60);
-    var mm = total % 60;
-    if (hh === 0) return mm + "분";
-    return mm === 0 ? hh + "시간" : hh + "시간 " + mm + "분";
-  }
-
-  var RULER_MAX = 300;
-  function rulerPos(idx) { return Math.min(idx / RULER_MAX, 1) * 100; }
-
-  /* 산의 대표 코스 = 가장 수월한 코스 */
-  function easiest(m) {
-    return m.courses.reduce(function (a, c) {
-      return difficulty(c.dist, c.gain, c.terrain) < difficulty(a.dist, a.gain, a.terrain) ? c : a;
-    });
-  }
-
-  MOUNTAINS.forEach(function (m) {
-    m.courses.forEach(function (c) {
-      c.idx = difficulty(c.dist, c.gain, c.terrain);
-      c.hrs = hours(c.dist, c.gain, c.terrain);
-      c.grade = gradeOf(c.idx);
-    });
-    var rep = easiest(m);
-    m.idx = rep.idx;
-    m.grade = rep.grade;
-    m.rep = rep;
-    m.maxIdx = Math.max.apply(null, m.courses.map(function (c) { return c.idx; }));
-    m.maxGrade = gradeOf(m.maxIdx);
-  });
+  HC.enrich(MOUNTAINS);
 
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var el = function (tag, cls, text) {
@@ -297,6 +253,13 @@
     body.appendChild(meta);
 
     body.appendChild(el("p", null, m.summary));
+
+    if (m.access) {
+      var acc = el("p", "access");
+      acc.appendChild(el("span", "access-label", "군자역에서"));
+      acc.appendChild(el("span", null, m.access));
+      body.appendChild(acc);
+    }
 
     m.courses.slice().sort(function (a, b) { return a.idx - b.idx; }).forEach(function (c) {
       var wrap = el("div", "course");
