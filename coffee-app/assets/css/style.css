@@ -72,14 +72,14 @@ h1,h2,h3{font-family:'Hahmlet','Gothic A1',serif; font-weight:600; text-wrap:bal
 a{color:var(--accent);}
 
 /* ---------- 앱 셸 ---------- */
-.app{max-width:940px; margin:0 auto; padding:0 20px 96px;}
+.app{max-width:940px; margin:0 auto; padding:0 20px calc(96px + env(safe-area-inset-bottom));}
 
 .appbar{
   position:sticky; top:0; z-index:20;
   background:var(--bg);
   border-bottom:1px solid var(--border);
   margin:0 0 26px;
-  padding:16px 20px 0;
+  padding:calc(16px + env(safe-area-inset-top)) 20px 0;
 }
 .appbar-top{display:flex; align-items:center; justify-content:space-between; gap:12px; max-width:900px; margin:0 auto;}
 .brand{display:flex; flex-direction:column;}
@@ -313,7 +313,7 @@ footer{border-top:1px solid var(--border); padding-top:20px; margin-top:34px; co
 
 @media (max-width:640px){
   .app{padding:0 14px 80px;}
-  .appbar{margin:0 0 20px; padding:12px 14px 0;}
+  .appbar{margin:0 0 20px; padding:calc(12px + env(safe-area-inset-top)) 14px 0;}
   .panel{padding:16px;}
   .timer-clock{font-size:2rem;}
   .cup-attr{grid-template-columns:88px 1fr 46px;}

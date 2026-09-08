@@ -54,6 +54,42 @@
     });
   }
 
+  /* 설치 배너 — Chrome 계열만 beforeinstallprompt를 제공합니다. */
+  function initInstall() {
+    var deferred = null;
+    var btn = $('#install-btn');
+    var state = $('#install-state');
+    var standalone = global.matchMedia('(display-mode: standalone)').matches || global.navigator.standalone === true;
+
+    if (standalone) {
+      if (state) state.textContent = '이미 설치된 앱으로 실행 중입니다.';
+      return;
+    }
+
+    global.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferred = e;
+      btn.hidden = false;
+      if (state) state.textContent = '이 브라우저는 바로 설치할 수 있습니다. 상단의 \u2018홈 화면에 추가\u2019 버튼을 누르세요.';
+    });
+
+    btn.addEventListener('click', function () {
+      if (!deferred) return;
+      deferred.prompt();
+      deferred.userChoice.then(function (choice) {
+        if (choice.outcome === 'accepted') toast('홈 화면에 추가했습니다.');
+        deferred = null;
+        btn.hidden = true;
+      });
+    });
+
+    global.addEventListener('appinstalled', function () {
+      btn.hidden = true;
+      if (state) state.textContent = '설치가 완료되었습니다. 홈 화면에서 실행해 보세요.';
+      toast('설치가 완료되었습니다.');
+    });
+  }
+
   function init() {
     applyTheme(S.read('theme', 'auto'));
     $('#theme-toggle').addEventListener('click', function () {
@@ -63,6 +99,7 @@
     });
 
     initTabs();
+    initInstall();
     global.BrewView.init();
     global.CaffeineView.init();
     global.BeansView.init();

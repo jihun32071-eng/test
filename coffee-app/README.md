@@ -32,13 +32,31 @@ xdg-open coffee-app/index.html    # Linux
 npx http-server coffee-app -p 8080
 ```
 
+## 폰에 설치하기 (PWA)
+
+HTTPS로 서빙되는 주소에 접속하면 홈 화면에 설치할 수 있고, 설치 후에는 오프라인에서도 동작합니다.
+
+- **iPhone (Safari)** — 공유 버튼(□↑) → `홈 화면에 추가`
+- **Android (Chrome)** — 우측 상단 ⋮ → `앱 설치`. 설치 가능한 상태면 앱 상단에 `홈 화면에 추가` 버튼도 나타납니다.
+
+`manifest.webmanifest`가 이름·아이콘·시작 URL을, `sw.js`가 앱 셸 캐시(캐시 우선)와 구글 폰트
+캐시(stale-while-revalidate)를 담당합니다. 서비스 워커는 보안 컨텍스트에서만 등록되므로
+`file://`로 열면 설치·오프라인 기능 없이 앱만 동작합니다.
+
+배포 예시 — GitHub Pages: 저장소 Settings → Pages → Deploy from a branch로 브랜치를 지정하면
+`https://<사용자>.github.io/<저장소>/coffee-app/` 에서 열립니다.
+
 ## 구조
 
 ```
 coffee-app/
 ├── index.html              화면 마크업(탭 5개)
+├── manifest.webmanifest    PWA 매니페스트(이름·아이콘·시작 URL·바로가기)
+├── sw.js                   서비스 워커(앱 셸 캐시, 오프라인 실행)
 └── assets/
-    ├── css/style.css       매뉴얼의 디자인 토큰(색·타이포·다크모드)을 그대로 사용
+    ├── css/
+    │   └── style.css       매뉴얼의 디자인 토큰(색·타이포·다크모드)을 그대로 사용
+    ├── icons/              앱 아이콘(192 · 512 · maskable · apple-touch)
     └── js/
         ├── data.js         매뉴얼에서 뽑아낸 상수: 방식·로스팅·음료·카페인·커핑·보관
         ├── store.js        localStorage 저장소, 날짜/DOM 유틸
@@ -47,7 +65,7 @@ coffee-app/
         ├── beans.js        원두 등록 · 신선도 계산
         ├── cupping.js      커핑 점수 · 향미 태그 · 노트
         ├── guide.js        참조표 렌더링
-        └── app.js          탭 전환 · 테마 · 토스트
+        └── app.js          탭 전환 · 테마 · 토스트 · 설치 프롬프트
 ```
 
 의존성이 없는 순수 HTML/CSS/JS이며, 스크립트는 전역 네임스페이스(`CoffeeData`, `Store`, `BrewView` …)로
