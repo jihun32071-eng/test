@@ -18,7 +18,9 @@
     S.write('view', name);
     if (name === 'caffeine') global.CaffeineView.render();
     if (name === 'beans') global.BeansView.render();
-    if (global.location.hash.slice(1) !== name) global.history.replaceState(null, '', '#' + name);
+    try {
+      if (global.location.hash.slice(1) !== name) global.history.replaceState(null, '', '#' + name);
+    } catch (e) { /* 샌드박스 등 히스토리 조작이 막힌 환경은 무시합니다. */ }
   }
 
   function toast(msg) {
