@@ -13,6 +13,21 @@ sh 실행.sh                       # → http://localhost:8000
 
 ## 휴대폰에 앱으로 넣기
 
+### 안드로이드 — APK (설정 건드릴 것 없음)
+
+`app/` 아래 Capacitor 껍데기가 있고, `app/**` 이나 `morning-brief/index.html` 이
+바뀌면 CI 가 APK 를 빌드해 릴리스에 올립니다. 폰 브라우저로 열어서 받으면 됩니다.
+
+    https://github.com/jihun32071-eng/test/releases/tag/morning-brief
+
+서명 없는 디버그 빌드라, 설치할 때 폰 설정에서 "출처를 알 수 없는 앱 설치"를
+한 번 허용해야 합니다. 플레이스토어 앱과는 별개로 설치됩니다.
+
+APK 안에서는 PWA 조각(manifest·설치 버튼·서비스워커)이 걷힙니다 — `sync-web.mjs`
+설명 참고.
+
+### 아이폰 / 웹 — PWA
+
 홈 화면 설치는 **https 주소**가 있어야 됩니다. 이 저장소는 GitHub Pages 가 이미
 켜져 있고 **기본 브랜치 루트**를 서비스하므로, `morning-brief/` 가 기본 브랜치에
 들어가면 바로 앱 주소가 생깁니다.
@@ -25,16 +40,12 @@ sh 실행.sh                       # → http://localhost:8000
 > 기본적으로 **기본 브랜치에서만** 배포를 허용합니다. 기능 브랜치에서 돌리면
 > 로그도 남기지 못하고 몇 초 만에 실패합니다 — 그래서 그 워크플로는 뺐습니다.
 
-설치 방법:
-
-- **안드로이드·데스크톱 크롬** — 주소창의 설치 아이콘, 또는 앱 헤더의 "설치" 버튼
 - **iOS 사파리** — 공유 → 홈 화면에 추가 (`beforeinstallprompt` 가 없어 버튼은 안 뜹니다)
+- **데스크톱·안드로이드 크롬** — 주소창의 설치 아이콘, 또는 앱 헤더의 "설치" 버튼
 
 설치하면 주소창 없이 뜨고, 비행기 모드에서도 열립니다. 기록은 그 기기의
-`localStorage` 에 남습니다.
-
-저장소 루트의 `.nojekyll` 은 Pages 가 파일을 Jekyll 로 가공하지 않고 그대로
-내보내게 합니다.
+`localStorage` 에 남습니다. 저장소 루트의 `.nojekyll` 은 Pages 가 파일을 Jekyll 로
+가공하지 않고 그대로 내보내게 합니다.
 
 ## 파일
 
@@ -45,7 +56,11 @@ sh 실행.sh                       # → http://localhost:8000
 | `sw.js` | 오프라인 캐시. 내용을 바꾸면 안의 `VERSION` 을 올리세요 |
 | `icon.svg` / `icon-*.png` | 아이콘. PNG는 `icon.svg` 에서 뽑은 것이라 SVG가 원본입니다 |
 | `build-artifact.mjs` | 아티팩트 게시용 본문 생성 (`dist/artifact.html`) |
+| `strip-pwa.mjs` | PWA 조각 걷어내는 규칙. 아티팩트 빌드와 APK 빌드가 공유 |
+| `make-android-icons.sh` | `icon.svg` → 안드로이드 런처 아이콘 (`app/android-res/`) |
 | `실행.sh` | 로컬 서버 띄우고 브라우저 열기 |
+
+APK 껍데기는 저장소 루트의 `app/` 에 따로 있습니다 (`app/android-res/README.md` 참고).
 
 ## 어떻게 도는가
 
@@ -131,22 +146,32 @@ function watchNight(m){
 남고, 깜빡임을 막으려고 `<body>` 첫 줄의 짧은 인라인 스크립트가 렌더 전에
 `data-theme` 을 먼저 붙입니다.
 
-### 설치 · 오프라인
+### 서비스워커 (PWA 쪽만 해당)
 
-`app.webmanifest` + `sw.js` 로 홈 화면 설치와 오프라인 실행이 됩니다.
-캐시 전략은 stale-while-revalidate — 아침에 열자마자 떠야 하는 화면이라
-캐시를 먼저 주고 새 버전은 뒤에서 받아 **다음 실행**에 반영합니다.
-그래서 고친 내용이 바로 안 보이면 한 번 더 열어보세요. `sw.js` 의 `VERSION` 을
-올리면 옛 캐시가 정리됩니다.
+`app.webmanifest` + `sw.js` 로 홈 화면 설치와 오프라인 실행이 됩니다. 등록은
+`index.html` 맨 아래 `<!--pwa:-->` 블록에서 하고, **https 또는 localhost 에서만**
+붙습니다 — `file://` 로 열면 등록되지 않습니다.
 
-크롬 계열은 설치 조건을 만족하면 헤더에 "설치" 버튼이 뜹니다. iOS 사파리는
-`beforeinstallprompt` 가 없어서 버튼이 안 뜨고, 공유 → "홈 화면에 추가"로 넣습니다.
+캐시 전략은 stale-while-revalidate — 아침에 열자마자 떠야 하는 화면이라 캐시를
+먼저 주고 새 버전은 뒤에서 받아 **다음 실행**에 반영합니다. 그래서 고친 내용이
+바로 안 보이면 한 번 더 열어보세요. `sw.js` 의 `VERSION` 을 올리면 옛 캐시가
+정리됩니다.
+
+APK 안에서는 이 블록이 통째로 걷힙니다. 자산이 이미 기기에 들어 있어 캐시가
+필요 없고, 앱을 업데이트해도 서비스워커 캐시가 남아 지난 화면을 계속 내주기
+때문입니다.
 
 ### 아이콘 다시 뽑기
 
-`icon.svg` 가 원본입니다. 고친 뒤 PNG를 다시 뽑으려면 헤드리스 크로뮴으로
-찍으면 됩니다 (툴바 높이 때문에 일반 `chrome --headless` 는 아래가 잘리니
-`headless_shell` 을 쓰세요).
+`icon.svg` 가 원본입니다. 고친 뒤 안드로이드 런처 아이콘까지 다시 뽑으려면:
+
+```bash
+sh make-android-icons.sh          # → app/android-res/mipmap-*/
+```
+
+웹 아이콘(`icon-192.png` 등)은 헤드리스 크로뮴으로 직접 찍습니다. 툴바 높이 때문에
+일반 `chrome --headless` 는 아래가 잘리니 **`headless_shell`** 을 쓰세요 — 이걸로
+한참 헤맸습니다.
 
 ```bash
 headless_shell --no-sandbox --hide-scrollbars --force-device-scale-factor=1 \
@@ -172,9 +197,12 @@ node build-artifact.mjs      # → dist/artifact.html
   나머지는 팀 줄 "어제" 칸에 직접 입력
 - **아침 알림** — 브라우저는 열려 있지 않은 앱을 정해진 시각에 깨우지 못합니다.
   푸시 서버를 두거나, 휴대폰 알람에 앱을 걸어두는 쪽이 현실적입니다
+- **APK 안에서 웹폰트** — Gowun Batang·IBM Plex 는 구글 폰트에서 받아옵니다.
+  APK 를 오프라인으로 열면 시스템 한글 폰트로 대체됩니다. 묶어 넣으려면 한글
+  서브셋을 만들어야 하는데 몇 MB 짜리 일입니다
 - **리센느** — 구성안대로 브리핑에서 제외. 안내 문구와 Blip 링크만
 
-앞의 셋은 서버(또는 프록시)를 하나 두면 풀립니다. 브라우저에서 직접 호출하면
+날씨·결과·알림은 서버(또는 프록시)를 하나 두면 풀립니다. 브라우저에서 직접 호출하면
 CORS와 API 키 노출이 걸립니다.
 
 ## 다음 단계
