@@ -1,0 +1,1377 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>디지바이스 제로</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+<style>
+:root{
+  --void:#080c17;
+  --shell-1:#1c2540;
+  --shell-2:#131a2e;
+  --shell-edge:#2f3c63;
+  --lcd:#0d1424;
+  --lcd-edge:#39466e;
+  --amber:#ff8a3d;
+  --cyan:#4ee1d0;
+  --danger:#ff5470;
+  --gold:#ffc861;
+  --ink:#e2e8f7;
+  --ink-dim:#7f8fb3;
+  --ink-faint:#4f5c7d;
+  --ok:#7ee787;
+  --r:14px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(1100px 700px at 50% -10%, #16203a 0%, transparent 60%),
+    radial-gradient(700px 500px at 100% 100%, #1a1330 0%, transparent 55%),
+    var(--void);
+  color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
+  display:flex;
+  justify-content:center;
+  padding:18px 12px 40px;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+.device{
+  width:100%;
+  max-width:452px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  padding:16px 16px 18px;
+  border-radius:30px;
+  background:linear-gradient(168deg,var(--shell-1),var(--shell-2) 62%,#0f1526);
+  border:1px solid var(--shell-edge);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.07) inset,
+    0 -20px 50px rgba(0,0,0,.45) inset,
+    0 30px 70px -20px rgba(0,0,0,.85);
+}
+/* ---- 상단 브랜드 ---- */
+.brand{
+  display:flex;align-items:center;gap:9px;
+  font-family:"Do Hyeon",sans-serif;
+  font-size:15px;letter-spacing:.14em;color:var(--ink-dim);
+  padding:0 4px;
+}
+.brand b{color:var(--amber);font-weight:400}
+.led{
+  width:8px;height:8px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 9px var(--cyan);animation:pulse 2.4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.brand .gen{
+  margin-left:auto;font-family:"Nanum Gothic Coding",monospace;font-size:11px;
+  letter-spacing:.08em;color:var(--ink-faint);
+}
+/* ---- 스크린 ---- */
+.screen{
+  position:relative;
+  border-radius:18px;
+  padding:9px;
+  background:linear-gradient(180deg,#0a1020,#0f1729);
+  border:1px solid var(--lcd-edge);
+  box-shadow:0 0 0 4px rgba(0,0,0,.35) inset, 0 6px 20px rgba(0,0,0,.5) inset;
+}
+canvas{
+  display:block;width:100%;height:auto;aspect-ratio:4/3;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  border-radius:10px;background:var(--lcd);
+}
+.scan{
+  position:absolute;inset:9px;border-radius:10px;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.045) 0 1px,transparent 1px 3px);
+  mix-blend-mode:overlay;
+}
+.hud{position:absolute;top:16px;left:16px;right:16px;display:flex;gap:6px;pointer-events:none}
+.chip{
+  font-family:"Nanum Gothic Coding",monospace;font-size:10px;font-weight:700;
+  letter-spacing:.05em;padding:3px 7px;border-radius:6px;
+  background:rgba(8,12,23,.72);color:var(--cyan);border:1px solid rgba(78,225,208,.28);
+}
+.chip.warn{color:var(--danger);border-color:rgba(255,84,112,.35)}
+.chip.right{margin-left:auto;color:var(--gold);border-color:rgba(255,200,97,.3)}
+.bhud{position:absolute;top:16px;left:16px;right:16px;display:none;gap:10px;pointer-events:none}
+.bhud.on{display:flex}
+.fi{
+  flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:3px;
+  background:rgba(8,12,23,.76);border:1px solid rgba(255,255,255,.13);
+  border-radius:8px;padding:4px 7px;
+}
+.fi.foe{align-items:flex-end}
+.fn{
+  font-family:"Nanum Gothic Coding",monospace;font-size:10.5px;font-weight:700;
+  color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+}
+.fb{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden}
+.fb>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5470,#ff8a3d);transition:width .25s ease}
+.fb.sp>i{background:linear-gradient(90deg,#4ee1d0,#5aa8ff)}
+.bmsg{
+  position:absolute;left:16px;right:16px;bottom:17px;display:none;
+  font-family:"Nanum Gothic Coding",monospace;font-size:11px;line-height:1.4;color:var(--ink);
+  background:rgba(8,12,23,.9);border-left:2px solid var(--gold);
+  padding:6px 9px;border-radius:0 7px 7px 0;pointer-events:none;
+}
+.bmsg.on{display:block}
+.hud.hide{display:none}
+.toast{
+  position:absolute;left:50%;bottom:20px;transform:translateX(-50%);
+  font-family:"Do Hyeon",sans-serif;font-size:14px;letter-spacing:.03em;
+  background:rgba(8,12,23,.88);border:1px solid var(--amber);color:var(--gold);
+  padding:5px 14px;border-radius:20px;white-space:nowrap;pointer-events:none;
+  opacity:0;transition:opacity .25s ease, transform .25s ease;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(-4px)}
+/* ---- 미터 ---- */
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:7px 14px;padding:2px 4px}
+.meter{display:flex;align-items:center;gap:7px}
+.meter .lb{
+  font-size:11px;color:var(--ink-dim);letter-spacing:.04em;
+  width:38px;flex:none;
+}
+.pips{display:flex;gap:3px}
+.pip{width:11px;height:11px;border-radius:3px;background:rgba(255,255,255,.08);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset}
+.pip.on{background:var(--amber);box-shadow:0 0 7px rgba(255,138,61,.55)}
+.meter.mood .pip.on{background:var(--gold);box-shadow:0 0 7px rgba(255,200,97,.5)}
+.meter.energy .pip.on{background:var(--cyan);box-shadow:0 0 7px rgba(78,225,208,.5)}
+.bar{flex:1;height:9px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:5px;transition:width .3s ease}
+.bar.hp>i{background:linear-gradient(90deg,#ff5470,#ff8a3d)}
+.bar.sp>i{background:linear-gradient(90deg,#4ee1d0,#5aa8ff)}
+.num{
+  font-family:"Nanum Gothic Coding",monospace;font-variant-numeric:tabular-nums;
+  font-size:11px;color:var(--ink-dim);min-width:52px;text-align:right;
+}
+/* ---- 패널 ---- */
+.panel{
+  background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r);padding:11px;display:flex;flex-direction:column;gap:9px;
+  min-height:132px;
+}
+.panel h3{
+  margin:0;font-family:"Do Hyeon",sans-serif;font-weight:400;font-size:14px;
+  letter-spacing:.05em;color:var(--ink-dim);
+}
+.panel p.hint{margin:0;font-size:12px;line-height:1.55;color:var(--ink-dim)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.grid.c2{grid-template-columns:repeat(2,1fr)}
+.grid.c3{grid-template-columns:repeat(3,1fr)}
+.btn{
+  appearance:none;border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(180deg,#293357,#1a2340);
+  color:var(--ink);border-radius:11px;padding:9px 4px;cursor:pointer;
+  font-size:12.5px;letter-spacing:.02em;line-height:1.25;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  box-shadow:0 2px 0 rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.08) inset;
+  transition:transform .07s ease, filter .15s ease;
+}
+.btn .k{font-size:15px;line-height:1}
+.btn:hover{filter:brightness(1.18)}
+.btn:active{transform:translateY(2px);box-shadow:0 0 0 rgba(0,0,0,.4)}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.btn[disabled]{opacity:.35;cursor:not-allowed;transform:none}
+.btn.hot{background:linear-gradient(180deg,#5a2f1c,#3a1d12);border-color:rgba(255,138,61,.4);color:var(--gold)}
+.btn.cool{background:linear-gradient(180deg,#123c42,#0d272d);border-color:rgba(78,225,208,.35);color:var(--cyan)}
+.btn.ghost{background:transparent;border-style:dashed;color:var(--ink-dim)}
+.btn .sub{font-size:10px;color:var(--ink-faint);font-family:"Nanum Gothic Coding",monospace}
+.btn.cool .sub,.btn.hot .sub{color:inherit;opacity:.7}
+/* 훈련 미니게임 */
+.track{
+  position:relative;height:30px;border-radius:9px;overflow:hidden;
+  background:linear-gradient(90deg,#1a2340,#232d52,#1a2340);
+  border:1px solid rgba(255,255,255,.09);
+}
+.zone{position:absolute;top:0;bottom:0;background:rgba(126,231,135,.22);border-left:1px solid var(--ok);border-right:1px solid var(--ok)}
+.zone.perfect{background:rgba(255,200,97,.3);border-color:var(--gold)}
+.needle{position:absolute;top:0;bottom:0;width:3px;background:var(--amber);box-shadow:0 0 10px var(--amber)}
+/* 배틀 기술 버튼 */
+.mv{align-items:flex-start;text-align:left;padding:8px 10px;gap:2px}
+.mv .nm{font-family:"Do Hyeon",sans-serif;font-size:13.5px;letter-spacing:.02em}
+.mv .mt{font-family:"Nanum Gothic Coding",monospace;font-size:10px;color:var(--ink-faint)}
+.tag{
+  display:inline-block;padding:1px 5px;border-radius:4px;font-size:9.5px;
+  font-family:"Nanum Gothic Coding",monospace;border:1px solid currentColor;opacity:.9;
+}
+/* ---- 로그 ---- */
+.logbox{
+  height:74px;overflow-y:auto;padding:8px 10px;border-radius:var(--r);
+  background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.06);
+  font-family:"Nanum Gothic Coding",monospace;font-size:11.5px;line-height:1.65;
+  color:var(--ink-dim);scrollbar-width:thin;
+}
+.logbox div{border-bottom:1px dotted rgba(255,255,255,.05);padding-bottom:2px;margin-bottom:2px}
+.logbox b{color:var(--gold);font-weight:700}
+.logbox i{color:var(--cyan);font-style:normal}
+.logbox s{color:var(--danger);text-decoration:none}
+/* ---- 하단 ---- */
+.foot{display:flex;align-items:center;gap:7px;padding:0 4px}
+.mini{
+  appearance:none;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);
+  color:var(--ink-dim);border-radius:9px;padding:5px 10px;font-size:11px;cursor:pointer;
+  font-family:"Nanum Gothic Coding",monospace;letter-spacing:.04em;
+}
+.mini:hover{color:var(--ink);border-color:rgba(255,255,255,.24)}
+.mini.on{color:var(--cyan);border-color:rgba(78,225,208,.4)}
+.foot .sp{margin-left:auto}
+/* ---- 모달 ---- */
+.modal{
+  position:fixed;inset:0;background:rgba(4,7,14,.82);backdrop-filter:blur(3px);
+  display:none;align-items:center;justify-content:center;padding:24px;z-index:20;
+}
+.modal.on{display:flex}
+.card{
+  width:100%;max-width:340px;background:linear-gradient(168deg,#1c2540,#121829);
+  border:1px solid var(--shell-edge);border-radius:20px;padding:20px;
+  display:flex;flex-direction:column;gap:13px;box-shadow:0 30px 60px -20px #000;
+}
+.card h2{margin:0;font-family:"Do Hyeon",sans-serif;font-weight:400;font-size:20px;letter-spacing:.03em;color:var(--gold)}
+.card p{margin:0;font-size:12.5px;line-height:1.7;color:var(--ink-dim)}
+.card input{
+  width:100%;padding:11px 13px;border-radius:11px;background:rgba(0,0,0,.4);
+  border:1px solid var(--shell-edge);color:var(--ink);font-family:inherit;font-size:14px;
+}
+.card input:focus{outline:2px solid var(--amber);outline-offset:1px}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;font-size:12px}
+.dl dt{color:var(--ink-faint);font-family:"Nanum Gothic Coding",monospace}
+.dl dd{margin:0;color:var(--ink);text-align:right;font-family:"Nanum Gothic Coding",monospace;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:400px){
+  .btn{font-size:11.5px;padding:8px 2px}
+  .meter .lb{width:34px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<main class="device">
+  <div class="brand"><span class="led"></span>DIGIVICE <b>ZERO</b><span class="gen" id="genTag">GEN 1</span></div>
+
+  <div class="screen">
+    <canvas id="cv" width="160" height="120" aria-label="디지몬 화면"></canvas>
+    <div class="scan"></div>
+    <div class="hud">
+      <span class="chip" id="chipTime">1일차 · 00:00</span>
+      <span class="chip" id="chipCare">케어미스 0</span>
+      <span class="chip warn" id="chipState" hidden>질병</span>
+      <span class="chip right" id="chipStage">디지타마</span>
+    </div>
+    <div class="bhud" id="bhud">
+      <div class="fi"><span class="fn" id="fnMe">-</span>
+        <span class="fb"><i id="fbMeHp"></i></span><span class="fb sp"><i id="fbMeSp"></i></span></div>
+      <div class="fi foe"><span class="fn" id="fnFoe">-</span>
+        <span class="fb"><i id="fbFoeHp"></i></span></div>
+    </div>
+    <div class="bmsg" id="bmsg"></div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <div class="meters">
+    <div class="meter"><span class="lb">배고픔</span><span class="pips" id="pHunger"></span></div>
+    <div class="meter energy"><span class="lb">기력</span><span class="pips" id="pEnergy"></span></div>
+    <div class="meter mood"><span class="lb">기분</span><span class="pips" id="pHappy"></span></div>
+    <div class="meter"><span class="lb">무게</span><span class="num" id="nWeight">10 g</span></div>
+    <div class="meter"><span class="lb">HP</span><span class="bar hp"><i id="bHp"></i></span><span class="num" id="nHp">20/20</span></div>
+    <div class="meter"><span class="lb">기술치</span><span class="bar sp"><i id="bSp"></i></span><span class="num" id="nSp">10/10</span></div>
+  </div>
+
+  <div class="panel" id="panel"></div>
+  <div class="logbox" id="log"></div>
+
+  <div class="foot">
+    <button class="mini" id="btnSpeed">속도 x1</button>
+    <button class="mini" id="btnSound">소리 ON</button>
+    <button class="mini sp" id="btnReset">데이터 초기화</button>
+  </div>
+</main>
+
+<div class="modal" id="modal"><div class="card" id="modalCard"></div></div>
+<script>
+"use strict";
+/* =========================================================================
+   디지바이스 제로 — 육성 + 진화 + 턴제 배틀
+   ========================================================================= */
+const $  = s => document.querySelector(s);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const clamp = (v,a,b) => v<a?a:(v>b?b:v);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+
+/* ---------- 스프라이트 템플릿 (16x16, 문자=팔레트 인덱스) ---------- */
+const TPL = {
+egg:[
+"................",
+".....222222.....",
+"...2211111122...",
+"..221111111122..",
+".22111111111122.",
+".21111111111112.",
+".21111331111112.",
+".21111111111112.",
+".21111113311112.",
+".21111111111112.",
+".22111111111122.",
+"..221111111122..",
+"...2211111122...",
+".....222222.....",
+"................",
+"................"],
+blob:[
+"................",
+"................",
+"................",
+"......2222......",
+"....22111122....",
+"...2211111122...",
+"..221111111122..",
+"..211331133112..",
+"..211111111112..",
+"..211114411112..",
+"..221111111122..",
+"...2211111122...",
+"....22111122....",
+".....222222.....",
+"....22....22....",
+"................"],
+blob2:[
+"................",
+"..22........22..",
+"..21........12..",
+"..211.2222.112..",
+"..221111111122..",
+".21111111111112.",
+".21133111133112.",
+".21111111111112.",
+".21111444411112.",
+".21111111111112.",
+"..221111111122..",
+"...2211111122...",
+"....22111122....",
+".....222222.....",
+"....22....22....",
+"................"],
+biped:[
+"................",
+".....222222.....",
+"....21111112....",
+"...2111111112...",
+"...2133113312...",
+"...2111111112...",
+"...2114444112...",
+"....21111112....",
+".....211112.....",
+"...2211111122...",
+"..211111111112..",
+"..211144441112..",
+"..211111111112..",
+"...2211111122...",
+"...22......22...",
+"..222......222.."],
+beast:[
+"................",
+"......2222......",
+"....22111122....",
+"..221111111122..",
+".21111111111112.",
+".21133111133112.",
+".21111111111112.",
+".21144444444112.",
+".21111111111112.",
+".22111111111122.",
+"..211111111112..",
+"..211111111112..",
+"...2211111122...",
+"..22.22..22.22..",
+"..22.22..22.22..",
+".222.22..22.222."],
+wing:[
+"................",
+"......2222......",
+".....211112.....",
+".....231132.....",
+".....211112.....",
+".22..211112..22.",
+"2222.211112.2222",
+".222.211112.222.",
+"..2..211112..2..",
+"....22111122....",
+"....21144112....",
+"....21111112....",
+"...2211111122...",
+"...22......22...",
+"...22......22...",
+"..222......222.."],
+mega:[
+"......2222......",
+".....211112.....",
+".....233332.....",
+".....211112.....",
+".22222111122222.",
+".21122111122112.",
+".22222111122222.",
+"....21111112....",
+"....21144112....",
+"....21144112....",
+"....21111112....",
+"...2211111122...",
+"...2211111122...",
+"...22......22...",
+"...22......22...",
+"..2222....2222.."],
+poop:[
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"................",
+"......22........",
+".....2112.......",
+"....211112......",
+"...21111112.....",
+"..2111111112....",
+"..2222222222...."],
+grave:[
+"................",
+"................",
+"................",
+"......2222......",
+".....211112.....",
+"....21111112....",
+"....21133112....",
+"....21311312....",
+"....21133112....",
+"....21133112....",
+"....21111112....",
+"....21111112....",
+"....21111112....",
+"...2222222222...",
+"..222222222222..",
+"................"]
+};
+
+/* ---------- 디지몬 도감 ----------
+   pal = [본체, 외곽/그림자, 눈, 포인트, 하이라이트, 여분]                  */
+const F = (stage,tpl,pal,type,st,moves,desc) => ({stage,tpl,pal,type,st,moves,desc});
+const FORMS = {
+  "디지타마": F("유아기0","egg",["#f2e8d2","#7d6749","#5fb6e0","#ffd27f","#ffffff","#000"],"무",
+    {hp:16,sp:6,atk:3,def:3,spd:3},["몸통박치기"],"디지털 월드에서 온 알. 곧 부화한다."),
+
+  "뽀글몬": F("유아기Ⅰ","blob",["#bfe9ff","#3f7fa8","#123047","#ff8fb0","#fff","#000"],"무",
+    {hp:20,sp:8,atk:4,def:4,spd:5},["몸통박치기","거품방울"],"갓 태어난 물방울 슬라임. 아직 아무것도 못 한다."),
+  "토톳몬": F("유아기Ⅱ","blob2",["#ffd98a","#a86f2e","#3a2410","#ff7043","#fff","#000"],"무",
+    {hp:28,sp:12,atk:7,def:6,spd:7},["몸통박치기","깨물기","거품방울"],"귀가 자란 개구쟁이. 훈련을 시작할 수 있다."),
+
+  "불씨몬": F("성장기","biped",["#ff9d4d","#a33c12","#2b1207","#ffe066","#fff","#000"],"불",
+    {hp:46,sp:20,atk:14,def:9,spd:12},["몸통박치기","작은불꽃","깨물기"],"꼬리에 불씨를 품은 도마뱀형. 공격적이다."),
+  "물방울몬": F("성장기","biped",["#6fc7ff","#1f5f96","#0b2437","#c8f2ff","#fff","#000"],"물",
+    {hp:50,sp:22,atk:11,def:12,spd:11},["몸통박치기","물대포","거품방울"],"균형 잡힌 수생형. 무난하게 성장한다."),
+  "새싹몬": F("성장기","biped",["#8fdd7a","#2f7a3a","#12300f","#ffe066","#fff","#000"],"풀",
+    {hp:54,sp:20,atk:11,def:13,spd:9},["몸통박치기","덩굴채찍","치유포자"],"행복하게 자란 식물형. 회복 기술을 쓴다."),
+  "쇳조각몬": F("성장기","biped",["#c3cbdb","#5a6579","#1a1f2b","#ff8a3d","#fff","#000"],"강철",
+    {hp:58,sp:18,atk:12,def:16,spd:8},["몸통박치기","철갑돌진","방어태세"],"규율 있게 자란 금속형. 방어가 단단하다."),
+  "그늘몬": F("성장기","biped",["#8f7fd6","#3a2a63","#150d29","#ff5470","#fff","#000"],"어둠",
+    {hp:48,sp:24,atk:16,def:8,spd:13},["깨물기","어둠발톱","기력흡수"],"방치 속에 자란 어둠형. 강하지만 불안정하다."),
+
+  "화룡몬": F("성숙기","beast",["#ff6b3d","#8e2a10","#2b0f06","#ffd54a","#fff","#000"],"불",
+    {hp:92,sp:36,atk:28,def:19,spd:22},["작은불꽃","화염방사","깨물기","용의숨결"],"화염을 두른 용. 압도적인 화력."),
+  "해수몬": F("성숙기","beast",["#4aa8e8","#12507f","#06202f","#a8f0ff","#fff","#000"],"물",
+    {hp:100,sp:40,atk:24,def:23,spd:20},["물대포","해일","깨물기","재생"],"바다를 지배하는 짐승. 지구력이 뛰어나다."),
+  "숲괴몬": F("성숙기","beast",["#6cc96a","#256b2d","#0e2a0d","#ffe066","#fff","#000"],"풀",
+    {hp:108,sp:34,atk:23,def:26,spd:16},["덩굴채찍","대지분쇄","치유포자","방어태세"],"숲의 수호수. 맷집이 두껍다."),
+  "강철몬": F("성숙기","beast",["#aab6c9","#4c566a","#171c26","#ff8a3d","#fff","#000"],"강철",
+    {hp:104,sp:32,atk:26,def:30,spd:14},["철갑돌진","금속포","방어태세","깨물기"],"전신이 합금인 병기형. 최강의 방어."),
+  "마수몬": F("성숙기","beast",["#7a63c9","#2e1f57","#110a22","#ff5470","#fff","#000"],"어둠",
+    {hp:88,sp:44,atk:32,def:16,spd:25},["어둠발톱","암흑파","기력흡수","깨물기"],"이성을 잃은 마수. 위험한 화력."),
+
+  "염제룡몬": F("완전체","wing",["#ff8a3d","#9b2f0e","#2b0f06","#ffe066","#fff","#000"],"불",
+    {hp:150,sp:60,atk:46,def:32,spd:38},["화염방사","용의숨결","작열지옥","재생"],"불꽃 날개를 펼친 화룡의 완성형."),
+  "심해왕몬": F("완전체","wing",["#3f9ae0","#0d4a78","#04202e","#b6f2ff","#fff","#000"],"물",
+    {hp:164,sp:66,atk:40,def:38,spd:34},["해일","심연의소용돌이","재생","금속포"],"심해를 다스리는 왕. 공수 균형형."),
+  "대수신몬": F("완전체","wing",["#79cf6f","#1f6b2c","#0b280c","#ffe066","#fff","#000"],"풀",
+    {hp:178,sp:58,atk:38,def:44,spd:28},["대지분쇄","세계수의가호","치유포자","덩굴채찍"],"거목의 신. 압도적인 생명력."),
+  "기갑장군몬": F("완전체","wing",["#c9d3e4","#586378","#191e29","#ff8a3d","#fff","#000"],"강철",
+    {hp:170,sp:56,atk:44,def:48,spd:26},["금속포","섬멸포격","방어태세","철갑돌진"],"강철 군단의 장군. 요새 그 자체."),
+  "나락마수몬": F("완전체","wing",["#8a6ee0","#301e63","#120a26","#ff5470","#fff","#000"],"어둠",
+    {hp:146,sp:72,atk:52,def:28,spd:42},["암흑파","심연의소용돌이","기력흡수","어둠발톱"],"나락에서 기어 나온 마수. 극단적 공격형."),
+
+  "인페르노몬": F("궁극체","mega",["#ff7a2f","#8f2606","#2b0f06","#ffd54a","#fff","#000"],"불",
+    {hp:230,sp:96,atk:72,def:54,spd:60},["작열지옥","용의숨결","화염방사","재생"],"모든 것을 재로 만드는 불꽃의 궁극."),
+  "오션로드몬": F("궁극체","mega",["#3d9fe8","#0a4676","#04202e","#c4f6ff","#fff","#000"],"물",
+    {hp:250,sp:104,atk:64,def:62,spd:54},["심연의소용돌이","해일","재생","섬멸포격"],"대해의 군주. 무너지지 않는 균형."),
+  "가이아로드몬": F("궁극체","mega",["#7ad46f","#1e6b2b","#0b280c","#ffe066","#fff","#000"],"풀",
+    {hp:272,sp:92,atk:60,def:70,spd:46},["세계수의가호","대지분쇄","치유포자","섬멸포격"],"행성의 의지. 끝없는 재생력."),
+  "오메가기어몬": F("궁극체","mega",["#d2dbea","#5c6779","#191e29","#ff8a3d","#fff","#000"],"강철",
+    {hp:262,sp:88,atk:70,def:76,spd:44},["섬멸포격","금속포","방어태세","철갑돌진"],"완성된 전쟁 병기. 절대적인 장갑."),
+  "아비스로드몬": F("궁극체","mega",["#9b7cf0","#2b1a63","#120a26","#ff5470","#fff","#000"],"어둠",
+    {hp:224,sp:112,atk:82,def:46,spd:66},["암흑파","심연의소용돌이","기력흡수","작열지옥"],"심연 그 자체. 닿는 모든 것을 삼킨다."),
+
+  /* --- 야생 전용 --- */
+  "벌레몬": F("성장기","blob2",["#c9d96a","#5f6b1f","#22280a","#ff8a3d","#fff","#000"],"풀",
+    {hp:34,sp:12,atk:9,def:7,spd:10},["몸통박치기","덩굴채찍"],"초원의 애벌레형."),
+  "박쥐몬": F("성장기","blob",["#8b7bb8","#372a5c","#150d29","#ff5470","#fff","#000"],"어둠",
+    {hp:40,sp:16,atk:13,def:8,spd:16},["깨물기","기력흡수"],"동굴의 흡혈형."),
+  "용암몬": F("성숙기","beast",["#e8563d","#7a1c0c","#2b0f06","#ffb020","#fff","#000"],"불",
+    {hp:86,sp:30,atk:26,def:20,spd:18},["작은불꽃","화염방사","깨물기"],"화산의 폭주체."),
+  "해파리몬": F("성숙기","blob",["#7fd9e8","#1f6f8a","#06202f","#ff8fb0","#fff","#000"],"물",
+    {hp:78,sp:44,atk:22,def:18,spd:26},["물대포","기력흡수","거품방울"],"심해의 부유체."),
+  "골렘몬": F("성숙기","beast",["#9aa3b5","#4a5262","#171c26","#7ee787","#fff","#000"],"강철",
+    {hp:120,sp:26,atk:24,def:34,spd:10},["철갑돌진","대지분쇄","방어태세"],"유적을 지키는 거인."),
+  "사신몬": F("완전체","wing",["#6e5bb0","#251747","#120a26","#ff5470","#fff","#000"],"어둠",
+    {hp:158,sp:70,atk:50,def:30,spd:40},["암흑파","기력흡수","어둠발톱"],"어둠의 성 문지기.")
+};
+
+/* ---------- 기술 ---------- */
+const M = (t,p,sp,tx,fx) => ({t,p,sp,tx,fx});
+const MOVES = {
+  "몸통박치기": M("무",6,0,"몸을 던져 부딪힌다"),
+  "거품방울":   M("물",7,2,"거품을 뿜는다"),
+  "깨물기":     M("무",9,2,"날카롭게 물어뜯는다"),
+  "작은불꽃":   M("불",11,4,"작은 화염구를 던진다"),
+  "물대포":     M("물",11,4,"고압의 물줄기"),
+  "덩굴채찍":   M("풀",11,4,"덩굴로 후려친다"),
+  "철갑돌진":   M("강철",12,5,"장갑째로 돌진한다"),
+  "어둠발톱":   M("어둠",13,5,"어둠을 두른 발톱"),
+  "방어태세":   M("무",0,4,"2턴간 받는 피해 절반","guard"),
+  "치유포자":   M("풀",0,6,"HP를 30% 회복한다","heal"),
+  "기력흡수":   M("어둠",9,5,"피해의 절반을 흡수한다","drain"),
+  "화염방사":   M("불",17,8,"불길을 내뿜는다"),
+  "해일":       M("물",17,8,"거대한 파도를 일으킨다"),
+  "대지분쇄":   M("풀",17,8,"대지를 뒤흔든다"),
+  "금속포":     M("강철",17,8,"합금 탄환을 발사한다"),
+  "암흑파":     M("어둠",19,9,"어둠의 충격파"),
+  "용의숨결":   M("불",21,11,"용의 숨결로 태운다"),
+  "재생":       M("무",0,10,"HP를 50% 회복한다","heal2"),
+  "작열지옥":   M("불",28,16,"모든 것을 재로 만든다"),
+  "심연의소용돌이": M("어둠",27,15,"심연으로 끌어당긴다","drain"),
+  "세계수의가호": M("풀",0,14,"HP를 70% 회복하고 방어를 올린다","bless"),
+  "섬멸포격":   M("강철",29,17,"전 화력을 쏟아붓는다")
+};
+
+/* ---------- 속성 상성 ---------- */
+const ADV = {"불":["풀","강철"],"물":["불"],"풀":["물"],"강철":["풀","어둠"],"어둠":["물"],"무":[]};
+const TYPECOLOR = {"무":"#7f8fb3","불":"#ff8a3d","물":"#4ea8ff","풀":"#7ee787","강철":"#c3cbdb","어둠":"#a78bfa"};
+function typeMul(a,b){
+  if((ADV[a]||[]).includes(b)) return 1.6;
+  if((ADV[b]||[]).includes(a)) return 0.65;
+  return 1;
+}
+
+/* ---------- 진화 트리 (at = 현재 형태 유지 게임분) ---------- */
+const EVO = {
+  "디지타마":[{to:"뽀글몬",at:10}],
+  "뽀글몬":[{to:"토톳몬",at:180}],
+  "토톳몬":[
+    {to:"그늘몬",  at:600, c:s=>s.care>=5},
+    {to:"불씨몬",  at:600, c:s=>s.care<=1 && s.train>=3 && s.foc.atk>=s.foc.def},
+    {to:"쇳조각몬",at:600, c:s=>s.care<=2 && s.foc.def>=2},
+    {to:"새싹몬",  at:600, c:s=>s.care<=3 && s.happy>=4},
+    {to:"물방울몬",at:600}
+  ],
+  "불씨몬":[{to:"마수몬",at:1440,c:s=>s.care>=8},{to:"화룡몬",at:1440}],
+  "물방울몬":[{to:"마수몬",at:1440,c:s=>s.care>=8},{to:"해수몬",at:1440}],
+  "새싹몬":[{to:"마수몬",at:1440,c:s=>s.care>=8},{to:"숲괴몬",at:1440}],
+  "쇳조각몬":[{to:"마수몬",at:1440,c:s=>s.care>=8},{to:"강철몬",at:1440}],
+  "그늘몬":[
+    {to:"숲괴몬",at:1440,c:s=>s.care<=6 && s.happy>=4},
+    {to:"마수몬",at:1440}
+  ],
+  "화룡몬":[{to:"나락마수몬",at:2880,c:s=>s.care>=12},{to:"염제룡몬",at:2880,c:s=>s.wins>=4},{to:"마수몬",at:2880}],
+  "해수몬":[{to:"나락마수몬",at:2880,c:s=>s.care>=12},{to:"심해왕몬",at:2880,c:s=>s.wins>=4},{to:"마수몬",at:2880}],
+  "숲괴몬":[{to:"나락마수몬",at:2880,c:s=>s.care>=12},{to:"대수신몬",at:2880,c:s=>s.wins>=4},{to:"마수몬",at:2880}],
+  "강철몬":[{to:"나락마수몬",at:2880,c:s=>s.care>=12},{to:"기갑장군몬",at:2880,c:s=>s.wins>=4},{to:"마수몬",at:2880}],
+  "마수몬":[{to:"나락마수몬",at:2880}],
+  "염제룡몬":[{to:"인페르노몬",at:4320,c:s=>s.wins>=9&&s.care<=10}],
+  "심해왕몬":[{to:"오션로드몬",at:4320,c:s=>s.wins>=9&&s.care<=10}],
+  "대수신몬":[{to:"가이아로드몬",at:4320,c:s=>s.wins>=9&&s.care<=10}],
+  "기갑장군몬":[{to:"오메가기어몬",at:4320,c:s=>s.wins>=9&&s.care<=10}],
+  "나락마수몬":[{to:"아비스로드몬",at:4320,c:s=>s.wins>=9}]
+};
+const STAGE_ORDER = ["디지타마","유아기0","유아기Ⅰ","유아기Ⅱ","성장기","성숙기","완전체","궁극체"];
+
+/* ---------- 모험 지역 ---------- */
+const AREAS = [
+  {n:"초원 지대", sky:["#1b3d5c","#2f6f7a"], gnd:"#2c6b46", lv:1, need:"유아기Ⅱ",
+   mobs:["벌레몬","뽀글몬","토톳몬"], boss:"숲괴몬", drop:"meat"},
+  {n:"화산 협곡", sky:["#3b1a1a","#7a3218"], gnd:"#4a2318", lv:4, need:"성장기",
+   mobs:["불씨몬","박쥐몬","용암몬"], boss:"화룡몬", drop:"vitamin"},
+  {n:"심해 회로", sky:["#0b2436","#12566e"], gnd:"#123a4d", lv:8, need:"성숙기",
+   mobs:["해파리몬","물방울몬","골렘몬"], boss:"심해왕몬", drop:"herb"},
+  {n:"어둠의 성", sky:["#1a1030","#3a1f52"], gnd:"#241436", lv:14, need:"성숙기",
+   mobs:["박쥐몬","마수몬","골렘몬"], boss:"사신몬", drop:"medicine"}
+];
+const ITEMS = {
+  meat:    {n:"고기",   d:"배고픔 +2, 무게 +2"},
+  vitamin: {n:"비타민", d:"기력 +2, 기술치 회복"},
+  herb:    {n:"회복초", d:"HP 40% 회복"},
+  medicine:{n:"치료약", d:"질병·부상 치료"}
+};
+
+/* =========================================================================
+   상태
+   ========================================================================= */
+const SAVE_KEY = "digivice-zero-v1";
+const REAL_TO_GAME = 2;          // 실제 1초 = 게임 2분 (x1 기준)
+let S=null, view="main", speed=1, sound=true, battle=null, train=null, evoFx=0;
+
+function newPet(gen, items){
+  return {
+    v:1, gen:gen||1, nick:"", form:"디지타마", age:0, since:0,
+    hunger:5, energy:5, happy:3, weight:10, disc:0,
+    care:0, poop:0, sick:false, hurt:false, dead:false,
+    lights:true, sleeping:false,
+    hp:16, sp:6, foc:{atk:0,def:0,spd:0}, train:0, wins:0, losses:0, needName:false,
+    t:{h:0,e:0,m:0,p:0,w:0,call:0,rec:0,sickT:0,lightMiss:0},
+    items: items || {meat:3, vitamin:2, herb:2, medicine:1},
+    cleared:[false,false,false,false],
+    hist:[], last:Date.now()
+  };
+}
+function form(){ return FORMS[S.form]; }
+function stageIdx(){ return STAGE_ORDER.indexOf(form().stage); }
+function petName(){ return S.nick || S.form; }
+
+function stats(){
+  const b = form().st;
+  let o = {
+    maxhp: b.hp + S.foc.def*3 + S.wins*3,
+    maxsp: b.sp + S.foc.spd*2 + S.train,
+    atk:   b.atk + Math.round(S.foc.atk*1.3),
+    def:   b.def + Math.round(S.foc.def*1.2),
+    spd:   b.spd + Math.round(S.foc.spd*1.4)
+  };
+  if(S.sick){ o.atk=Math.round(o.atk*.6); o.def=Math.round(o.def*.6); o.spd=Math.round(o.spd*.6); }
+  if(S.hurt){ o.atk=Math.round(o.atk*.8); o.spd=Math.round(o.spd*.8); }
+  if(S.hunger===0) o.atk=Math.round(o.atk*.7);
+  return o;
+}
+
+/* =========================================================================
+   로그 / 토스트 / 사운드
+   ========================================================================= */
+function log(html){
+  const box=$("#log");
+  const d=document.createElement("div");
+  d.innerHTML = "<span style='color:#4f5c7d'>"+clockStr()+"</span> " + html;
+  box.appendChild(d);
+  while(box.children.length>60) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+let toastTimer=null;
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("on"),1600);
+}
+let actx=null;
+function beep(freq,dur,type){
+  if(!sound) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type=type||"square"; o.frequency.value=freq;
+    g.gain.setValueAtTime(.05,actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+(dur||.09));
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime+(dur||.09));
+  }catch(e){}
+}
+function clockStr(){
+  const d=Math.floor(S.age/1440)+1, h=Math.floor((S.age%1440)/60), m=Math.floor(S.age%60);
+  return d+"일 "+String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
+}
+function isNight(){ const h=Math.floor((S.age%1440)/60); return h>=20 || h<6; }
+
+/* =========================================================================
+   캔버스 렌더링
+   ========================================================================= */
+const cv=$("#cv"), cx=cv.getContext("2d");
+cx.imageSmoothingEnabled=false;
+
+function sprite(tpl,pal,x,y,sc,flip){
+  const rows=TPL[tpl];
+  for(let r=0;r<16;r++){
+    const line=rows[r];
+    for(let c=0;c<16;c++){
+      const ch=line.charAt(c);
+      if(ch===".") continue;
+      const col=pal[parseInt(ch,10)-1];
+      if(!col) continue;
+      cx.fillStyle=col;
+      cx.fillRect(x+(flip?15-c:c)*sc, y+r*sc, sc, sc);
+    }
+  }
+}
+/* 텍스트는 전부 DOM 오버레이가 담당한다 — 캔버스는 픽셀 아트만 그린다 */
+function mark(x,y,col){                       // 머리 위 상태 표시(느낌표)
+  cx.fillStyle="rgba(8,12,23,.8)"; cx.fillRect(x,y,7,12);
+  cx.fillStyle=col; cx.fillRect(x+3,y+2,2,5); cx.fillRect(x+3,y+9,2,2);
+}
+function grad(c1,c2){
+  const g=cx.createLinearGradient(0,0,0,120); g.addColorStop(0,c1); g.addColorStop(1,c2); return g;
+}
+let tick=0;
+function draw(){
+  tick++;
+  const bob = Math.floor(tick/10)%2;
+  cx.clearRect(0,0,160,120);
+
+  if(battle){ drawBattle(bob); }
+  else if(S.dead){ drawGrave(); }
+  else { drawRoom(bob); }
+
+  if(evoFx>0){
+    const a=evoFx/60;
+    cx.fillStyle="rgba(255,255,255,"+(a*.9)+")"; cx.fillRect(0,0,160,120);
+    cx.strokeStyle="rgba(255,200,97,"+a+")"; cx.lineWidth=2;
+    for(let i=0;i<3;i++){
+      cx.beginPath(); cx.arc(80,64,(1-a)*(30+i*22)+6,0,7); cx.stroke();
+    }
+    evoFx--;
+  }
+  requestAnimationFrame(draw);
+}
+
+function drawRoom(bob){
+  const night = isNight() && !S.lights;
+  cx.fillStyle = night ? grad("#05070f","#0a1020") : grad("#16223d","#243a5e");
+  cx.fillRect(0,0,160,120);
+  if(night){
+    cx.fillStyle="rgba(255,255,255,.5)";
+    for(let i=0;i<14;i++) cx.fillRect((i*37+11)%150+4, (i*23+7)%54+6, 1,1);
+  }else{
+    cx.fillStyle="rgba(78,225,208,.10)";
+    for(let i=0;i<9;i++) cx.fillRect(0, 18+i*7, 160, 1);
+    for(let i=0;i<11;i++) cx.fillRect(i*16, 18, 1, 62);
+  }
+  cx.fillStyle = night ? "#0f1526" : "#1d2c49";
+  cx.fillRect(0,80,160,40);
+  cx.fillStyle = night ? "#151d33" : "#283c61"; cx.fillRect(0,80,160,2);
+
+  for(let i=0;i<Math.min(S.poop,4);i++)
+    sprite("poop", ["#8a6a3a","#4a3418"], 6+i*22, 66, 2, false);
+
+  const f=form();
+  const y = 40 + (S.sleeping?6:0) - bob*2;
+  sprite(f.tpl, f.pal, 80-24, y, 3, false);
+
+  if(S.sleeping){
+    cx.fillStyle="#9fb0d6"; cx.font="10px monospace";
+    cx.fillText("z", 112, 46-bob*2); cx.fillText("Z", 118, 38+bob*2);
+  }
+  if(S.sick) mark(77, 26, "#ff5470");
+  else if(S.hurt) mark(77, 26, "#ff8a3d");
+  else if((S.hunger===0||S.energy===0) && Math.floor(tick/20)%2===0) mark(77, 26, "#ffc861");
+}
+function drawGrave(){
+  cx.fillStyle=grad("#0a0d18","#161a2c"); cx.fillRect(0,0,160,120);
+  cx.fillStyle="#1a1f33"; cx.fillRect(0,88,160,32);
+  sprite("grave", ["#6b7690","#39415a","#1a1f2b"], 80-24, 34, 3, false);
+}
+function drawBattle(bob){
+  const A=AREAS[battle.area];
+  cx.fillStyle=grad(A.sky[0],A.sky[1]); cx.fillRect(0,0,160,120);
+  cx.fillStyle="rgba(255,255,255,.07)";
+  for(let i=0;i<6;i++) cx.fillRect((i*29+battle.area*7)%150, 20+(i%3)*9, 12, 2);
+  cx.fillStyle=A.gnd; cx.fillRect(0,86,160,34);
+  cx.fillStyle="rgba(0,0,0,.22)"; cx.fillRect(0,86,160,2);
+
+  const pf=FORMS[battle.p.form], ef=FORMS[battle.e.form];
+  const px = 16 + battle.pOff, ex = 96 - battle.eOff;
+  cx.fillStyle="rgba(0,0,0,.3)";
+  cx.fillRect(px+8,86,32,3); cx.fillRect(ex+8,86,32,3);
+  sprite(pf.tpl, pf.pal, px, 40-bob, 3, false);
+  sprite(ef.tpl, ef.pal, ex, 34-((bob+1)%2), 3, true);
+
+  if(battle.flash>0){
+    cx.fillStyle="rgba(255,255,255,"+(battle.flash/12)+")"; cx.fillRect(0,0,160,120);
+    battle.flash--;
+  }
+  if(battle.pOff>0) battle.pOff=Math.max(0,battle.pOff-2);
+  if(battle.eOff>0) battle.eOff=Math.max(0,battle.eOff-2);
+}
+
+/* =========================================================================
+   시간 경과 · 케어 판정
+   ========================================================================= */
+function advance(mins){
+  if(S.dead) return;
+  let left=mins;
+  while(left>0){
+    const m=Math.min(left,10); left-=m;
+    S.age+=m; S.since+=m;
+    const t=S.t;
+
+    const night=isNight();
+    S.sleeping = night && S.form!=="디지타마";
+
+    if(!S.sleeping){
+      t.h+=m; t.e+=m; t.m+=m; t.p+=m;
+      if(t.h>=170){ t.h=0; if(S.hunger>0) S.hunger--; }
+      if(t.e>=150){ t.e=0; if(S.energy>0) S.energy--; }
+      if(t.m>=230){ t.m=0; if(S.happy>0) S.happy--; }
+      if(t.p>=200 && S.form!=="디지타마"){ t.p=0; S.poop++; }
+    }else{
+      if(S.lights){                       // 불을 켠 채 재우면 케어 미스
+        t.lightMiss+=m;
+        if(t.lightMiss>=60){ t.lightMiss=0; S.care++; log("<s>불빛 때문에 잠들지 못했다 (케어미스)</s>"); }
+      }else{
+        t.lightMiss=0; t.rec+=m;
+        if(t.rec>=90){ t.rec=0; if(S.energy<5) S.energy++; }
+      }
+    }
+    t.w+=m; if(t.w>=300){ t.w=0; if(S.weight>5) S.weight--; }
+
+    if(S.hunger===0 || S.energy===0){
+      t.call+=m;
+      if(t.call>=60){ t.call=0; S.care++; log("<s>부름에 응답하지 않았다 (케어미스 "+S.care+")</s>"); }
+    } else t.call=0;
+
+    if(S.poop>=4 && !S.sick && Math.random()<m/300){
+      S.sick=true; log("<s>더러운 환경 탓에 병에 걸렸다!</s>");
+    }
+    if(S.sick){
+      t.sickT+=m;
+      if(t.sickT>=720){ die("병을 이겨내지 못했다"); return; }
+    } else t.sickT=0;
+
+    if(S.care>=15){ die("보살핌을 받지 못해 데이터가 흩어졌다"); return; }
+
+    checkEvolve();
+    if(S.dead) return;
+  }
+}
+function die(reason){
+  S.dead=true; battle=null; view="main";
+  log("<s>"+petName()+"은(는) "+reason+".</s>");
+  beep(140,.5,"sawtooth");
+  openModal("<h2>데이터 소멸</h2><p>"+petName()+"("+form().stage+")은(는) "+reason+".<br>"+
+    "함께한 시간 <b>"+clockStr()+"</b> · 전적 "+S.wins+"승 "+S.losses+"패 · 케어미스 "+S.care+"</p>"+
+    "<button class='btn hot' data-modal='rebirth'>새로운 알을 받는다</button>");
+}
+function checkEvolve(){
+  const rules=EVO[S.form]; if(!rules) return;
+  for(const r of rules){
+    if(S.since>=r.at && (!r.c || r.c(S))){ evolveTo(r.to); return; }
+  }
+}
+function evolveTo(name){
+  const prev=S.form, ps=form().stage;
+  S.form=name; S.since=0; S.hurt=false;
+  const st=stats(); S.hp=st.maxhp; S.sp=st.maxsp;
+  S.hist.push(name);
+  evoFx=60; beep(660,.12); setTimeout(()=>beep(880,.14),130); setTimeout(()=>beep(1180,.22),280);
+  log("<b>"+prev+"이(가) "+name+"(으)로 진화했다!</b>");
+  toast(name+" 진화!");
+  if(prev==="디지타마"){
+    S.needName=true;               // 모달이 비었을 때 updateUI가 이름 짓기를 띄운다
+  }else{
+    openModal("<h2>진화!</h2><p><b>"+prev+"</b> ("+ps+")<br>↓<br><b style='font-size:17px'>"+name+"</b> ("+FORMS[name].stage+")</p>"+
+      "<p>"+FORMS[name].desc+"</p><button class='btn cool' data-modal='close'>확인</button>");
+  }
+  updateUI();
+}
+function askName(){
+  openModal("<h2>이름을 지어주자</h2><p>부화한 "+S.form+"의 이름을 정해 주세요.</p>"+
+    "<input id='nickIn' maxlength='8' placeholder='"+S.form+"' autocomplete='off'>"+
+    "<button class='btn hot' data-modal='name'>결정</button>");
+  setTimeout(()=>{ const el=$("#nickIn"); if(el) el.focus(); },80);
+}
+
+/* =========================================================================
+   케어 액션
+   ========================================================================= */
+function needAwake(){
+  if(S.sleeping && !S.lights){ toast("자고 있다"); return false; }
+  return true;
+}
+const ACT={
+  feed(kind){
+    if(!needAwake()) return;
+    if(!S.items[kind]){ toast("아이템이 없다"); return; }
+    S.items[kind]--;
+    if(kind==="meat"){
+      if(S.hunger>=5){ S.happy=clamp(S.happy-1,0,5); S.weight+=3; log("배부른데 억지로 먹였다. 기분 하락."); }
+      else { S.hunger=clamp(S.hunger+2,0,5); S.weight+=2; log("고기를 먹었다. 배고픔 회복."); }
+    } else if(kind==="vitamin"){
+      S.energy=clamp(S.energy+2,0,5); S.sp=stats().maxsp; S.weight+=1; log("<i>비타민으로 기력과 기술치를 회복했다.</i>");
+    } else if(kind==="herb"){
+      const st=stats(); S.hp=clamp(S.hp+Math.round(st.maxhp*.4),0,st.maxhp); log("<i>회복초로 HP를 회복했다.</i>");
+    } else if(kind==="medicine"){
+      if(S.sick||S.hurt){ S.sick=false; S.hurt=false; S.t.sickT=0; log("<i>치료약으로 완전히 회복했다!</i>"); }
+      else { log("아직 건강하다. 약을 낭비했다."); }
+    }
+    beep(520,.08); view="main"; updateUI();
+  },
+  clean(){
+    if(S.poop===0){ toast("깨끗하다"); return; }
+    log("배설물 "+S.poop+"개를 치웠다."); S.poop=0; S.happy=clamp(S.happy+1,0,5);
+    beep(300,.07); updateUI();
+  },
+  praise(){
+    if(!needAwake()) return;
+    S.happy=clamp(S.happy+1,0,5); S.disc=clamp(S.disc-2,0,100);
+    log("칭찬했다. 기분이 좋아졌다."); beep(740,.09); updateUI();
+  },
+  scold(){
+    if(!needAwake()) return;
+    S.disc=clamp(S.disc+6,0,100); S.happy=clamp(S.happy-1,0,5);
+    log("혼냈다. 규율 "+S.disc+"%."); beep(220,.09); updateUI();
+  },
+  lights(){
+    S.lights=!S.lights; log(S.lights?"불을 켰다.":"불을 껐다.");
+    beep(S.lights?600:260,.07); updateUI();
+  },
+  rest(){
+    if(!S.hurt){ toast("부상이 없다"); return; }
+    S.hurt=false; S.energy=clamp(S.energy-1,0,5);
+    log("<i>충분히 쉬어 부상이 나았다.</i>"); updateUI();
+  }
+};
+
+/* =========================================================================
+   훈련 미니게임
+   ========================================================================= */
+const TRAIN_KIND={atk:{n:"힘",c:"#ff8a3d"},def:{n:"방어",c:"#c3cbdb"},spd:{n:"속도",c:"#4ee1d0"}};
+function startTrain(kind){
+  if(!needAwake()) return;
+  if(S.form==="디지타마"||S.form==="뽀글몬"){ toast("아직 훈련할 수 없다"); return; }
+  if(S.energy<1){ toast("기력이 없다"); return; }
+  if(S.sick){ toast("아파서 훈련 불가"); return; }
+  train={kind, pos:0, dir:1, sp:2.2+Math.random()*1.1, done:false};
+  view="traingame"; renderPanel();
+  train.timer=setInterval(()=>{
+    train.pos+=train.dir*train.sp;
+    if(train.pos>=100){train.pos=100;train.dir=-1;}
+    if(train.pos<=0){train.pos=0;train.dir=1;}
+    const n=$("#needle"); if(n) n.style.left="calc("+train.pos+"% - 1.5px)";
+  },16);
+}
+function stopTrain(){
+  if(!train||train.done) return;
+  train.done=true; clearInterval(train.timer);
+  const p=train.pos, k=train.kind;
+  let gain, grade;
+  if(p>=44&&p<=56){ gain=3; grade="퍼펙트"; }
+  else if(p>=32&&p<=68){ gain=2; grade="성공"; }
+  else if(p>=18&&p<=82){ gain=1; grade="아쉬움"; }
+  else { gain=0; grade="실패"; }
+  S.foc[k]+=gain; S.train++; S.energy=clamp(S.energy-1,0,5);
+  S.weight=Math.max(5,S.weight-1);
+  S.happy=clamp(S.happy+(gain>=2?1:-1),0,5);
+  const st=stats(); S.hp=Math.min(S.hp,st.maxhp); S.sp=Math.min(S.sp,st.maxsp);
+  if(gain>0){ beep(600+gain*140,.13); log("<i>"+TRAIN_KIND[k].n+" 훈련 "+grade+"! "+TRAIN_KIND[k].n+" +"+gain+"</i>"); }
+  else { beep(180,.16,"sawtooth"); log("<s>"+TRAIN_KIND[k].n+" 훈련 실패. 기분이 나빠졌다.</s>"); }
+  toast(grade+(gain?" +"+gain:""));
+  setTimeout(()=>{ train=null; view="main"; updateUI(); }, 700);
+  updateUI();
+}
+
+/* =========================================================================
+   배틀
+   ========================================================================= */
+function mkFighter(formName, lv, isPlayer){
+  const f=FORMS[formName], k=1+lv*0.085;
+  const st = isPlayer ? stats() : {
+    maxhp:Math.round(f.st.hp*k), maxsp:Math.round(f.st.sp*k),
+    atk:Math.round(f.st.atk*k), def:Math.round(f.st.def*k), spd:Math.round(f.st.spd*k)
+  };
+  return {
+    name: isPlayer? petName() : formName, form: formName, lv,
+    hp: isPlayer? S.hp : st.maxhp, maxhp: st.maxhp,
+    sp: isPlayer? S.sp : st.maxsp, maxsp: st.maxsp,
+    atk: st.atk, def: st.def, spd: st.spd,
+    type: f.type, moves: f.moves.slice(), guard:0, isP: !!isPlayer
+  };
+}
+function startBattle(areaIdx, boss){
+  if(!needAwake()) return;
+  const A=AREAS[areaIdx];
+  if(STAGE_ORDER.indexOf(A.need) > stageIdx()){ toast(A.need+" 이상 필요"); return; }
+  if(S.energy<1){ toast("기력이 부족하다"); return; }
+  if(S.sick){ toast("아파서 싸울 수 없다"); return; }
+  const st=stats();
+  if(S.hp < st.maxhp*0.25){ toast("HP가 너무 낮다"); return; }
+  S.energy=clamp(S.energy-1,0,5);
+  const lv = boss ? A.lv+4 : A.lv+rnd(0,2);
+  battle={
+    area:areaIdx, boss:!!boss,
+    p: mkFighter(S.form, 0, true),
+    e: mkFighter(boss? A.boss : pick(A.mobs), lv, false),
+    msg: (boss?"보스 ":"야생 ")+(boss?A.boss:"디지몬")+"이(가) 나타났다!",
+    flash:0, pOff:0, eOff:0, busy:false, turn:1
+  };
+  log((boss?"<b>[보스]</b> ":"")+"야생 <i>"+battle.e.name+" Lv"+battle.e.lv+"</i> 등장!");
+  beep(440,.1); setTimeout(()=>beep(560,.14),110);
+  view="battle"; updateUI();
+}
+function dmgCalc(a,d,mv){
+  if(mv.p===0) return 0;
+  const tm=typeMul(mv.t==="무"?a.type:mv.t, d.type);
+  let v = a.atk*mv.p/5*tm - d.def*0.6;
+  v *= 0.88+Math.random()*0.24;
+  if(d.guard>0) v*=0.5;
+  return Math.max(1, Math.round(v));
+}
+function applyMove(a,d,name){
+  const mv=MOVES[name];
+  a.sp=Math.max(0,a.sp-mv.sp);
+  let txt=a.name+"의 "+name+"!";
+  if(mv.fx==="heal"||mv.fx==="heal2"||mv.fx==="bless"){
+    const r = mv.fx==="heal"?.3 : mv.fx==="heal2"?.5 : .7;
+    const h=Math.round(a.maxhp*r); a.hp=Math.min(a.maxhp,a.hp+h);
+    if(mv.fx==="bless") a.guard=3;
+    return {txt:txt+" HP "+h+" 회복", dmg:0};
+  }
+  if(mv.fx==="guard"){ a.guard=3; return {txt:txt+" 방어 태세!", dmg:0}; }
+  const dm=dmgCalc(a,d,mv);
+  d.hp=Math.max(0,d.hp-dm);
+  const tm=typeMul(mv.t==="무"?a.type:mv.t, d.type);
+  if(tm>1) txt+=" 효과가 굉장하다!";
+  else if(tm<1) txt+=" 효과가 별로다";
+  if(mv.fx==="drain"){ const h=Math.round(dm/2); a.hp=Math.min(a.maxhp,a.hp+h); txt+=" ("+h+" 흡수)"; }
+  return {txt:txt+" "+dm+" 피해", dmg:dm};
+}
+function enemyPick(e){
+  const usable=e.moves.filter(m=>MOVES[m].sp<=e.sp);
+  if(!usable.length) return "몸통박치기";
+  if(e.hp<e.maxhp*0.35){
+    const heal=usable.find(m=>["heal","heal2","bless"].includes(MOVES[m].fx));
+    if(heal && Math.random()<0.6) return heal;
+  }
+  const good=usable.filter(m=>typeMul(MOVES[m].t, battle.p.type)>1);
+  if(good.length && Math.random()<0.65) return pick(good);
+  return pick(usable);
+}
+function playerMove(name){
+  if(!battle||battle.busy) return;
+  const mv=MOVES[name];
+  if(battle.p.sp<mv.sp){ toast("기술치 부족"); return; }
+  battle.busy=true;
+  const p=battle.p, e=battle.e;
+  const pFirst = p.spd>=e.spd ? Math.random()<0.85 : Math.random()<0.25;
+  const seq = pFirst ? [["p",name],["e",null]] : [["e",null],["p",name]];
+  runSeq(seq,0);
+}
+function runSeq(seq,i){
+  if(!battle) return;
+  if(i>=seq.length){ endTurn(); return; }
+  const [who,mvName]=seq[i];
+  const a = who==="p"?battle.p:battle.e, d = who==="p"?battle.e:battle.p;
+  if(a.hp<=0){ runSeq(seq,i+1); return; }
+  const name = who==="p" ? mvName : enemyPick(battle.e);
+  const r=applyMove(a,d,name);
+  if(who==="p") battle.pOff=10; else battle.eOff=10;
+  battle.flash= r.dmg>0 ? 10 : 0;
+  battle.msg=r.txt;
+  beep(who==="p"?520:300,.08);
+  updateUI();
+  setTimeout(()=>{
+    if(!battle) return;
+    if(battle.e.hp<=0){ winBattle(); return; }
+    if(battle.p.hp<=0){ loseBattle(); return; }
+    runSeq(seq,i+1);
+  }, 620);
+}
+function endTurn(){
+  if(!battle) return;
+  battle.turn++;
+  if(battle.p.guard>0) battle.p.guard--;
+  if(battle.e.guard>0) battle.e.guard--;
+  battle.p.sp=Math.min(battle.p.maxsp, battle.p.sp+1);
+  battle.e.sp=Math.min(battle.e.maxsp, battle.e.sp+1);
+  battle.busy=false; battle.msg="어떻게 할까?";
+  syncFromBattle(); updateUI();
+}
+function syncFromBattle(){ S.hp=battle.p.hp; S.sp=battle.p.sp; }
+function winBattle(){
+  const A=AREAS[battle.area], boss=battle.boss, en=battle.e.name;
+  syncFromBattle(); S.wins++; S.happy=clamp(S.happy+1,0,5);
+  const gainKey=pick(["atk","def","spd"]); S.foc[gainKey]+= boss?2:1;
+  const drop = boss ? A.drop : (Math.random()<0.55 ? pick(["meat","vitamin","herb"]) : null);
+  if(drop) S.items[drop]=(S.items[drop]||0)+(boss?2:1);
+  if(boss) S.cleared[battle.area]=true;
+  log("<b>승리!</b> "+en+"을(를) 쓰러뜨렸다. "+TRAIN_KIND[gainKey].n+" +"+(boss?2:1)+
+      (drop?" · <i>"+ITEMS[drop].n+"</i> 획득":""));
+  beep(660,.1); setTimeout(()=>beep(880,.18),120);
+  battle.msg=en+"을(를) 쓰러뜨렸다!"; updateUI();
+  const wasBoss=boss, area=battle.area;
+  setTimeout(()=>{
+    battle=null; view="main";
+    if(wasBoss) openModal("<h2>"+AREAS[area].n+" 제패</h2><p>보스를 쓰러뜨렸다!<br>"+
+      "<b>"+ITEMS[AREAS[area].drop].n+" x2</b>를 얻었다.</p><button class='btn cool' data-modal='close'>확인</button>");
+    updateUI();
+  },1100);
+}
+function loseBattle(){
+  S.losses++; S.hp=1; S.sp=0; S.hurt=true; S.happy=clamp(S.happy-2,0,5);
+  log("<s>패배… "+petName()+"은(는) 부상을 입었다.</s>");
+  beep(200,.3,"sawtooth");
+  battle.msg="쓰러졌다…"; updateUI();
+  setTimeout(()=>{ battle=null; view="main"; updateUI(); },1100);
+}
+function flee(){
+  if(!battle||battle.busy) return;
+  const ok = Math.random() < clamp(0.45 + (battle.p.spd-battle.e.spd)*0.03, 0.15, 0.9);
+  if(ok){ log("도망쳤다."); syncFromBattle(); battle=null; view="main"; updateUI(); }
+  else { battle.msg="도망칠 수 없었다!"; updateUI(); battle.busy=true; runSeq([["e",null]],0); }
+}
+function battleItem(kind){
+  if(!battle||battle.busy) return;
+  if(!S.items[kind]){ toast("아이템이 없다"); return; }
+  S.items[kind]--;
+  if(kind==="herb"){ const h=Math.round(battle.p.maxhp*.4); battle.p.hp=Math.min(battle.p.maxhp,battle.p.hp+h); battle.msg="회복초로 "+h+" 회복!"; }
+  else { battle.p.sp=battle.p.maxsp; battle.msg="비타민으로 기술치 회복!"; }
+  beep(560,.1); battle.busy=true; runSeq([["e",null]],0);
+}
+
+/* =========================================================================
+   UI
+   ========================================================================= */
+function pips(el,val,max){
+  let h=""; for(let i=0;i<max;i++) h+="<span class='pip"+(i<val?" on":"")+"'></span>";
+  el.innerHTML=h;
+}
+function btn(act,label,sub,cls,dis){
+  return "<button class='btn "+(cls||"")+"' data-a='"+act+"'"+(dis?" disabled":"")+">"+
+    "<span>"+label+"</span>"+(sub?"<span class='sub'>"+sub+"</span>":"")+"</button>";
+}
+function renderPanel(){
+  const P=$("#panel"); let h="";
+  if(S.dead){
+    h="<h3>데이터 소멸</h3><p class='hint'>"+petName()+"은(는) 더 이상 없다. 새 알을 받아 다시 시작할 수 있다.</p>"+
+      "<div class='grid c2'>"+btn("rebirth","새 알 받기","GEN "+(S.gen+1),"hot")+btn("status","기록 보기","","")+"</div>";
+    P.innerHTML=h; return;
+  }
+  if(view==="battle" && battle){
+    const p=battle.p;
+    h="<h3>"+battle.e.name+" Lv"+battle.e.lv+" · <span style='color:"+TYPECOLOR[battle.e.type]+"'>"+battle.e.type+"</span></h3><div class='grid c2'>";
+    p.moves.forEach(m=>{
+      const mv=MOVES[m], can=p.sp>=mv.sp && !battle.busy;
+      h+="<button class='btn mv' data-a='mv:"+m+"'"+(can?"":" disabled")+">"+
+         "<span class='nm'>"+m+"</span>"+
+         "<span class='mt'><span class='tag' style='color:"+TYPECOLOR[mv.t]+"'>"+mv.t+"</span> 위력 "+(mv.p||"-")+" · 기술치 "+mv.sp+"</span></button>";
+    });
+    h+="</div><div class='grid c3'>"+
+       btn("item:herb","회복초","x"+(S.items.herb||0),"cool",battle.busy||!S.items.herb)+
+       btn("item:vitamin","비타민","x"+(S.items.vitamin||0),"cool",battle.busy||!S.items.vitamin)+
+       btn("flee","도망","","ghost",battle.busy)+"</div>";
+    P.innerHTML=h; return;
+  }
+  if(view==="feed"){
+    h="<h3>먹이 주기</h3><div class='grid c2'>";
+    ["meat","vitamin","herb","medicine"].forEach(k=>{
+      h+=btn("feed:"+k, ITEMS[k].n+" x"+(S.items[k]||0), ITEMS[k].d, "", !S.items[k]);
+    });
+    h+="</div>"+btn("back","뒤로","","ghost");
+    P.innerHTML=h; return;
+  }
+  if(view==="train"){
+    h="<h3>훈련 종목</h3><p class='hint'>바가 중앙에 올 때 멈추면 큰 폭으로 성장한다. 기력을 1 소모한다.</p><div class='grid c3'>";
+    Object.keys(TRAIN_KIND).forEach(k=>{
+      h+=btn("tr:"+k, TRAIN_KIND[k].n, "+"+S.foc[k], "cool");
+    });
+    h+="</div>"+btn("back","뒤로","","ghost");
+    P.innerHTML=h; return;
+  }
+  if(view==="traingame"){
+    h="<h3>"+TRAIN_KIND[train.kind].n+" 훈련</h3>"+
+      "<div class='track'><div class='zone' style='left:18%;width:64%'></div>"+
+      "<div class='zone perfect' style='left:44%;width:12%'></div>"+
+      "<div class='needle' id='needle' style='left:0'></div></div>"+
+      btn("stop","스톱!","중앙일수록 큰 성장","hot");
+    P.innerHTML=h; return;
+  }
+  if(view==="area"){
+    h="<h3>모험 지역</h3><div class='grid c2'>";
+    AREAS.forEach((a,i)=>{
+      const lock = STAGE_ORDER.indexOf(a.need) > stageIdx();
+      h+=btn("area:"+i, a.n, lock? a.need+" 필요" : (S.cleared[i]?"제패 · Lv"+a.lv:"Lv"+a.lv+" 권장"), S.cleared[i]?"cool":"", lock);
+    });
+    h+="</div><div class='grid c2'>"+
+       btn("boss","보스 도전","현재 지역의 최강자","hot", STAGE_ORDER.indexOf(AREAS[lastArea].need)>stageIdx())+
+       btn("back","뒤로","","ghost")+"</div>";
+    P.innerHTML=h; return;
+  }
+  if(view==="status"){
+    const st=stats(), f=form();
+    h="<h3>"+petName()+" · "+f.stage+"</h3>"+
+      "<dl class='dl'>"+
+      "<dt>종족</dt><dd>"+S.form+" <span class='tag' style='color:"+TYPECOLOR[f.type]+"'>"+f.type+"</span></dd>"+
+      "<dt>나이</dt><dd>"+clockStr()+"</dd>"+
+      "<dt>힘 / 방어 / 속도</dt><dd>"+st.atk+" / "+st.def+" / "+st.spd+"</dd>"+
+      "<dt>훈련 횟수</dt><dd>"+S.train+"회</dd>"+
+      "<dt>전적</dt><dd>"+S.wins+"승 "+S.losses+"패</dd>"+
+      "<dt>케어미스 / 규율</dt><dd>"+S.care+"회 / "+S.disc+"%</dd>"+
+      "<dt>상태</dt><dd>"+(S.sick?"질병":S.hurt?"부상":"양호")+"</dd>"+
+      "<dt>진화 경로</dt><dd style='font-size:11px'>"+(S.hist.length?S.hist.join(" → "):"-")+"</dd>"+
+      "</dl>"+
+      "<p class='hint'>"+f.desc+"</p>"+
+      "<div class='grid c2'>"+btn("rest","휴식","부상 회복","",!S.hurt)+btn("back","뒤로","","ghost")+"</div>";
+    P.innerHTML=h; return;
+  }
+  /* main */
+  const lockTrain = S.form==="디지타마"||S.form==="뽀글몬";
+  h="<div class='grid'>"+
+    btn("feedmenu","먹이","",  "hot")+
+    btn("trainmenu","훈련","+"+(S.foc.atk+S.foc.def+S.foc.spd),"",lockTrain)+
+    btn("areamenu","모험","",  "cool", stageIdx()<3)+
+    btn("clean","청소", S.poop? "x"+S.poop : "깨끗", "", !S.poop)+
+    "</div><div class='grid'>"+
+    btn("praise","칭찬","","")+
+    btn("scold","혼내기","","")+
+    btn("lights", S.lights?"불 끄기":"불 켜기", isNight()?"밤":"낮","")+
+    btn("status","상태","","")+
+    "</div>";
+  P.innerHTML=h;
+}
+let lastArea=0;
+function updateUI(){
+  const st=stats();
+  S.hp=clamp(S.hp,0,st.maxhp); S.sp=clamp(S.sp,0,st.maxsp);
+  $("#chipTime").textContent=clockStr()+(isNight()?" 🌙":"");
+  const cc=$("#chipCare");
+  cc.textContent="케어미스 "+S.care;
+  cc.className="chip"+(S.care>=5?" warn":"");
+  $("#chipStage").textContent=form().stage+" · "+S.form;
+  $("#genTag").textContent=(S.nick? S.nick+" · " : "")+"GEN "+S.gen;
+  const cs=$("#chipState");
+  const stateTxt = S.dead?null : S.sick?"질병":S.hurt?"부상":S.hunger===0?"배고픔!":S.energy===0?"기력 없음":null;
+  cs.hidden=!stateTxt; if(stateTxt) cs.textContent=stateTxt;
+
+  const bh=$("#bhud"), bm=$("#bmsg");
+  $(".hud").classList.toggle("hide", !!battle);
+  bh.classList.toggle("on", !!battle);
+  bm.classList.toggle("on", !!(battle&&battle.msg));
+  if(battle){
+    const p=battle.p, e=battle.e;
+    $("#fnMe").textContent=p.name+" · "+p.type;
+    $("#fnFoe").textContent=e.name+" Lv"+e.lv+" · "+e.type;
+    $("#fbMeHp").style.width=(p.hp/p.maxhp*100)+"%";
+    $("#fbMeSp").style.width=(p.maxsp? p.sp/p.maxsp*100 : 0)+"%";
+    $("#fbFoeHp").style.width=(e.hp/e.maxhp*100)+"%";
+    bm.textContent=battle.msg||"";
+  }
+  pips($("#pHunger"),S.hunger,5); pips($("#pEnergy"),S.energy,5); pips($("#pHappy"),S.happy,5);
+  $("#nWeight").textContent=S.weight+" g";
+  $("#bHp").style.width=(st.maxhp?S.hp/st.maxhp*100:0)+"%";
+  $("#bSp").style.width=(st.maxsp?S.sp/st.maxsp*100:0)+"%";
+  $("#nHp").textContent=S.hp+"/"+st.maxhp;
+  $("#nSp").textContent=S.sp+"/"+st.maxsp;
+  renderPanel();
+  if(S.needName && !S.dead && !$("#modal").classList.contains("on")) askName();
+}
+
+/* =========================================================================
+   입력
+   ========================================================================= */
+$("#panel").addEventListener("click", e=>{
+  const b=e.target.closest("[data-a]"); if(!b||b.disabled) return;
+  const a=b.dataset.a, [cmd,arg]=a.split(":");
+  switch(cmd){
+    case "feedmenu": view="feed"; break;
+    case "trainmenu": view="train"; break;
+    case "areamenu": view="area"; break;
+    case "back": view="main"; break;
+    case "status": view="status"; break;
+    case "feed": ACT.feed(arg); return;
+    case "tr": startTrain(arg); return;
+    case "stop": stopTrain(); return;
+    case "area": lastArea=+arg; startBattle(+arg,false); return;
+    case "boss": startBattle(lastArea,true); return;
+    case "mv": playerMove(arg); return;
+    case "item": battleItem(arg); return;
+    case "flee": flee(); return;
+    case "clean": ACT.clean(); return;
+    case "praise": ACT.praise(); return;
+    case "scold": ACT.scold(); return;
+    case "lights": ACT.lights(); return;
+    case "rest": ACT.rest(); return;
+    case "rebirth": rebirth(); return;
+  }
+  beep(420,.05); updateUI();
+});
+function openModal(html){ $("#modalCard").innerHTML=html; $("#modal").classList.add("on"); }
+function closeModal(){ $("#modal").classList.remove("on"); }
+$("#modal").addEventListener("click", e=>{
+  const b=e.target.closest("[data-modal]"); if(!b) return;
+  const k=b.dataset.modal;
+  if(k==="close") closeModal();
+  else if(k==="name"){
+    const el=$("#nickIn"); S.nick=(el&&el.value.trim())||S.form;
+    log("<b>"+S.nick+"</b>(이)라고 이름 지었다.");
+    closeModal(); updateUI();
+  }
+  else if(k==="rebirth"){ closeModal(); rebirth(); }
+  else if(k==="reset"){ closeModal(); localStorage.removeItem(SAVE_KEY); S=newPet(1); $("#log").innerHTML=""; log("데이터를 초기화했다."); updateUI(); }
+});
+function rebirth(){
+  const items={}; Object.keys(S.items).forEach(k=>items[k]=Math.floor((S.items[k]||0)/2));
+  items.meat=Math.max(2,items.meat||0);
+  const g=S.gen+1;
+  S=newPet(g,items); view="main";
+  log("<b>새로운 디지타마를 받았다. (GEN "+g+")</b>");
+  beep(520,.12); setTimeout(()=>beep(700,.16),140);
+  updateUI();
+}
+$("#btnSpeed").addEventListener("click",()=>{
+  speed = speed===1?2 : speed===2?4 : 1;
+  $("#btnSpeed").textContent="속도 x"+speed;
+  $("#btnSpeed").classList.toggle("on", speed>1);
+});
+$("#btnSound").addEventListener("click",()=>{
+  sound=!sound; $("#btnSound").textContent="소리 "+(sound?"ON":"OFF");
+  $("#btnSound").classList.toggle("on",sound); if(sound) beep(600,.08);
+});
+$("#btnReset").addEventListener("click",()=>{
+  openModal("<h2>데이터 초기화</h2><p>지금까지의 육성 기록이 모두 사라진다. 계속할까?</p>"+
+    "<div class='grid c2'><button class='btn hot' data-modal='reset'>초기화</button>"+
+    "<button class='btn ghost' data-modal='close'>취소</button></div>");
+});
+document.addEventListener("keydown", e=>{
+  if(e.key===" " && view==="traingame"){ e.preventDefault(); stopTrain(); }
+  if(e.key==="Enter" && $("#nickIn")){ const b=$("[data-modal='name']"); if(b) b.click(); }
+});
+
+/* =========================================================================
+   저장 · 루프
+   ========================================================================= */
+function save(){ try{ S.last=Date.now(); localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY); if(!raw) return null;
+    const d=JSON.parse(raw); if(!d||d.v!==1||!FORMS[d.form]) return null;
+    const base=newPet(d.gen);
+    return Object.assign(base,d,{t:Object.assign(base.t,d.t||{}),foc:Object.assign(base.foc,d.foc||{})});
+  }catch(e){ return null; }
+}
+function boot(){
+  const l=load();
+  if(l){
+    S=l;
+    const away=Math.floor((Date.now()-(S.last||Date.now()))/1000*REAL_TO_GAME);
+    const applied=Math.min(away, 480);
+    if(applied>30){ advance(applied); log("<i>자리를 비운 사이 "+Math.floor(applied/60)+"시간이 흘렀다.</i>"); }
+    log("저장된 데이터를 불러왔다. "+petName()+" ("+form().stage+")");
+  }else{
+    S=newPet(1);
+    log("<b>디지타마를 받았다.</b> 곧 부화한다…");
+  }
+  updateUI(); draw();
+  setInterval(()=>{ if(!battle) advance(0.5*speed); updateUI(); }, 250);
+  setInterval(save, 4000);
+  window.addEventListener("beforeunload", save);
+  document.addEventListener("visibilitychange", ()=>{ if(document.hidden) save(); });
+}
+boot();
+</script>
+</body>
+</html>
