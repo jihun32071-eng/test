@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>아침 브리핑 설치</title>
+<meta name="description" content="아침 브리핑을 폰에 설치하는 두 가지 방법 — 앱으로 설치, 또는 APK 내려받기.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#E6EAF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D131B" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 브리핑 본체와 같은 토큰을 씁니다 — 설치 페이지가 앱과 다른 물건처럼 보이지 않게 */
+:root{
+  --ground:#E6EAF1; --surface:#FFFFFF; --surface-2:#F1F4F9;
+  --line:#D0D8E4; --line-soft:#E1E6EE;
+  --ink:#151C27; --ink-2:#48546A; --ink-3:#7A8598;
+  --accent:#9A5A12; --accent-soft:#F5E8D6;
+  --good:#1C7355;
+  --shadow:0 1px 2px rgba(21,28,39,.05), 0 8px 24px -16px rgba(21,28,39,.28);
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D131B; --surface:#151D28; --surface-2:#1C2733;
+    --line:#2A3645; --line-soft:#212C39;
+    --ink:#E5EBF4; --ink-2:#A3B0C1; --ink-3:#707C8C;
+    --accent:#E9AB5C; --accent-soft:#33270F;
+    --good:#5FCFA3;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -18px rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D131B; --surface:#151D28; --surface-2:#1C2733;
+  --line:#2A3645; --line-soft:#212C39;
+  --ink:#E5EBF4; --ink-2:#A3B0C1; --ink-3:#707C8C;
+  --accent:#E9AB5C; --accent-soft:#33270F;
+  --good:#5FCFA3;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -18px rgba(0,0,0,.9);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:520px;margin:0 auto;
+  padding:calc(34px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+          calc(56px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  display:flex;flex-direction:column;gap:16px;
+}
+
+header{display:flex;align-items:center;gap:14px}
+header img{width:56px;height:56px;flex:none;border-radius:13px}
+.eyebrow{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.09em;
+  color:var(--ink-3);text-transform:uppercase;margin:0 0 2px;
+}
+h1{
+  font-family:"Gowun Batang","Nanum Myeongjo",serif;font-weight:700;
+  font-size:26px;margin:0;letter-spacing:-.01em;line-height:1.2;text-wrap:balance;
+}
+
+.card{
+  background:var(--surface);border:1px solid var(--line-soft);
+  border-radius:var(--r);padding:16px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;gap:10px;
+}
+.card h2{
+  font-family:"Gowun Batang",serif;font-size:17px;font-weight:700;
+  margin:0;letter-spacing:-.01em;
+}
+.card p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.card p.fine{font-size:12.5px;color:var(--ink-3)}
+.tag{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;
+  color:var(--accent);font-weight:600;margin:0;
+}
+
+.btn{
+  font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+  display:block;width:100%;text-align:center;text-decoration:none;
+  padding:12px 16px;border-radius:8px;border:1px solid transparent;
+  background:var(--accent);color:var(--surface);
+}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border-color:var(--line)}
+.btn:disabled{
+  background:var(--surface-2);color:var(--ink-3);border-color:var(--line);
+  cursor:default;filter:none;font-weight:400;font-size:13.5px;
+}
+.size{
+  font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-3);
+  font-weight:400;
+}
+
+ol{margin:0;padding-left:1.2em;font-size:13.5px;color:var(--ink-2)}
+ol li + li{margin-top:4px}
+kbd{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;
+  background:var(--surface-2);border:1px solid var(--line);
+  border-radius:4px;padding:1px 5px;
+}
+.done{
+  display:flex;align-items:center;gap:7px;
+  font-size:13.5px;color:var(--good);font-weight:600;
+}
+.done::before{
+  content:"";width:7px;height:7px;border-radius:50%;
+  background:var(--good);flex:none;
+}
+footer{
+  border-top:1px solid var(--line);padding-top:14px;margin-top:2px;
+  font-size:12.5px;color:var(--ink-3);
+}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <img src="icon.svg" alt="" width="56" height="56">
+    <div>
+      <p class="eyebrow">Morning Brief</p>
+      <h1>폰에 설치하기</h1>
+    </div>
+  </header>
+
+  <section class="card" id="installed" hidden>
+    <p class="done">이미 설치된 앱으로 열려 있습니다</p>
+    <a class="btn ghost" href="./">브리핑 열기</a>
+  </section>
+
+  <section class="card">
+    <p class="tag">방법 1 · 권장</p>
+    <h2>앱으로 설치</h2>
+    <p>브라우저에서 바로 설치합니다. 내려받을 파일도, 따로 허용할 설정도 없습니다.</p>
+    <button type="button" class="btn" id="install" disabled>설치 조건 확인 중…</button>
+    <p class="fine" id="installNote">크롬·엣지에서 열면 이 버튼이 켜집니다.</p>
+  </section>
+
+  <section class="card" id="ios" hidden>
+    <p class="tag">아이폰 · 아이패드</p>
+    <h2>홈 화면에 추가</h2>
+    <p>사파리에는 설치 버튼을 띄우는 기능이 없어서 직접 넣어야 합니다.</p>
+    <ol>
+      <li>아래 <kbd>공유</kbd> 버튼을 누릅니다</li>
+      <li><kbd>홈 화면에 추가</kbd> 를 고릅니다</li>
+      <li><kbd>추가</kbd> 를 누릅니다</li>
+    </ol>
+    <p class="fine">사파리에서 열어야 나옵니다. 크롬·다른 앱의 내장 브라우저에서는 안 보입니다.</p>
+  </section>
+
+  <section class="card">
+    <p class="tag">방법 2 · 안드로이드</p>
+    <h2>APK 내려받기</h2>
+    <p id="apkNote">설치형 앱 파일을 직접 받습니다. 방법 1이 안 될 때 쓰세요.</p>
+    <a class="btn ghost" id="apk"
+       href="https://github.com/jihun32071-eng/test/releases/download/morning-brief/morning-brief.apk">
+      morning-brief.apk 받기 <span class="size">3.7 MB</span>
+    </a>
+    <p class="fine">
+      서명 없는 디버그 빌드라, 설치할 때 폰 설정에서 <b>출처를 알 수 없는 앱 설치</b>를
+      한 번 허용해야 합니다. 플레이스토어 앱과는 별개로 설치됩니다.
+    </p>
+  </section>
+
+  <footer>
+    설치하지 않고 <a href="./">브라우저에서 바로 열기</a> 도 됩니다.
+    기록은 기기별로 따로 쌓입니다 — 앱과 브라우저가 서로 다른 저장소를 씁니다.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var btn = document.getElementById("install");
+var note = document.getElementById("installNote");
+var prompt = null;
+
+/* 이미 설치된 앱으로 열렸으면 설치 안내는 의미가 없습니다 */
+var standalone = window.matchMedia("(display-mode: standalone)").matches ||
+                 window.navigator.standalone === true;
+if(standalone){
+  document.getElementById("installed").hidden = false;
+}
+
+/* iOS 사파리는 beforeinstallprompt 가 없어서 버튼을 띄울 방법이 없습니다.
+   대신 수동 절차를 보여줍니다. */
+var ua = navigator.userAgent;
+var isIOS = /iPad|iPhone|iPod/.test(ua) ||
+            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+if(isIOS && !standalone){
+  document.getElementById("ios").hidden = false;
+  btn.textContent = "사파리에서는 아래 절차로";
+  note.textContent = "iOS 는 브라우저가 설치 버튼을 띄우는 것을 허용하지 않습니다.";
+}
+
+window.addEventListener("beforeinstallprompt", function(e){
+  e.preventDefault();
+  prompt = e;
+  btn.disabled = false;
+  btn.textContent = "앱으로 설치";
+  note.textContent = "홈 화면에 아이콘이 생기고, 주소창 없이 열립니다.";
+});
+
+btn.addEventListener("click", function(){
+  if(!prompt) return;
+  prompt.prompt();
+  prompt.userChoice.then(function(choice){
+    prompt = null;
+    btn.disabled = true;
+    if(choice && choice.outcome === "accepted"){
+      btn.textContent = "설치됨";
+      note.textContent = "홈 화면에서 열어보세요.";
+    } else {
+      btn.textContent = "설치하지 않음";
+      note.textContent = "다시 설치하려면 이 페이지를 새로 고치세요.";
+    }
+  });
+});
+
+window.addEventListener("appinstalled", function(){
+  btn.disabled = true;
+  btn.textContent = "설치됨";
+  note.textContent = "홈 화면에서 열어보세요.";
+});
+
+/* 서비스워커가 붙어야 크롬이 설치를 제안합니다.
+   여기서 등록해두면 설치 페이지만 보고 나가도 앱이 오프라인으로 준비됩니다. */
+if("serviceWorker" in navigator &&
+   (location.protocol === "https:" || location.hostname === "localhost")){
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+
+/* 안드로이드가 아니면 APK 를 받아봐야 못 쓰니 그렇다고 적어둡니다 */
+if(!/Android/.test(ua)){
+  document.getElementById("apkNote").textContent =
+    "안드로이드 전용입니다. 이 기기에서는 방법 1로 설치하세요.";
+}
+})();
+</script>
+
+</body>
+</html>

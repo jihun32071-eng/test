@@ -1,0 +1,8 @@
+{
+  "appId": "com.jihun.morningbrief",
+  "appName": "아침 브리핑",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#E6EAF1"
+  }
+}

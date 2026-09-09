@@ -1,0 +1,17 @@
+{
+  "name": "morning-brief",
+  "version": "1.0.0",
+  "private": true,
+  "description": "아침 브리핑 — 안드로이드 앱 껍데기 (Capacitor)",
+  "scripts": {
+    "sync:web": "node scripts/sync-web.mjs",
+    "add:android": "cap add android",
+    "icons": "cp -R android-res/. android/app/src/main/res/",
+    "build:apk": "npm run sync:web && npm run add:android && npm run icons && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^7.6.9"
+  }
+}

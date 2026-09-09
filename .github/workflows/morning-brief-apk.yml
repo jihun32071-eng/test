@@ -1,0 +1,92 @@
+# 아침 브리핑을 안드로이드 APK 로 빌드해서 릴리스에 올립니다.
+#
+# 웹 코드는 morning-brief/index.html 한 곳에만 있습니다. sync-web.mjs 가
+# PWA 조각을 걷어내고 app/www/ 로 옮기면, Capacitor 가 그걸 감쌉니다.
+#
+# 안드로이드 네이티브 프로젝트(app/android/)는 커밋하지 않고 매번 새로 만듭니다
+# — 수백 개 생성 파일을 저장소에 두지 않으려고요. 대신 아이콘·실행화면만
+# app/android-res/ 에서 덮어씁니다.
+#
+# 받는 곳: https://github.com/<저장소>/releases/tag/morning-brief
+
+name: 아침 브리핑 APK
+
+on:
+  push:
+    paths:
+      - 'app/**'
+      - 'morning-brief/index.html'
+      - 'morning-brief/strip-pwa.mjs'
+      - '.github/workflows/morning-brief-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: 의존성 설치
+        working-directory: app
+        run: npm ci
+
+      - name: 웹 자산 동기화
+        working-directory: app
+        run: npm run sync:web
+
+      - name: 안드로이드 프로젝트 생성
+        working-directory: app
+        run: npx cap add android
+
+      - name: 아이콘·실행화면 덮어쓰기
+        working-directory: app
+        run: |
+          cp -R android-res/mipmap-mdpi android-res/mipmap-hdpi \
+                android-res/mipmap-xhdpi android-res/mipmap-xxhdpi \
+                android-res/mipmap-xxxhdpi android-res/mipmap-anydpi-v26 \
+                android-res/values android/app/src/main/res/
+          # 실행화면 이미지는 가로·세로 × 밀도별로 흩어져 있어 전부 덮어씁니다
+          find android/app/src/main/res -name splash.png \
+            -exec cp android-res/splash.png {} \;
+
+      - name: 디버그 APK 빌드
+        working-directory: app/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: APK 이름 정리
+        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk morning-brief.apk
+
+      - name: APK 업로드 (Actions 아티팩트)
+        uses: actions/upload-artifact@v4
+        with:
+          name: morning-brief-apk
+          path: morning-brief.apk
+          if-no-files-found: error
+
+      # 로그인 없이 폰 브라우저에서 바로 받을 수 있는 고정 링크.
+      # morning-brief 태그는 항상 최신 빌드를 가리킵니다.
+      - name: 릴리스에 APK 올리기
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view morning-brief >/dev/null 2>&1 || gh release create morning-brief \
+            --title "아침 브리핑 — 안드로이드 APK" \
+            --notes "폰 브라우저에서 아래 morning-brief.apk 를 눌러 받은 뒤 설치하세요. 설치하려면 폰 설정에서 '출처를 알 수 없는 앱 설치'를 허용해야 합니다. 서명이 없는 디버그 빌드라 플레이스토어 앱과는 별개로 설치됩니다. 이 태그는 항상 최신 빌드를 가리킵니다."
+          gh release upload morning-brief morning-brief.apk --clobber
+          echo "다운로드: https://github.com/${{ github.repository }}/releases/download/morning-brief/morning-brief.apk"
