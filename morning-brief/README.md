@@ -26,15 +26,23 @@ sh 실행.sh                       # → http://localhost:8000
 APK 안에서는 PWA 조각(manifest·설치 버튼·서비스워커)이 걷힙니다 — `sync-web.mjs`
 설명 참고.
 
-### 아이폰 / 웹 — PWA
+### 사이트에서 받기 — `install.html`
+
+Pages 에 올라가면 설치 페이지가 생깁니다. 앱으로 설치(PWA)와 APK 내려받기를
+한 화면에 놓고, 열린 기기에 맞는 것만 보여줍니다.
+
+    https://jihun32071-eng.github.io/test/morning-brief/install.html   ← 설치
+    https://jihun32071-eng.github.io/test/morning-brief/               ← 브리핑
+
+기기 판별은 `beforeinstallprompt` 지원 여부와 UA 로 합니다 — iOS 는 설치 버튼을
+띄울 방법이 없어 수동 절차를 보여주고, 안드로이드가 아니면 APK 카드에 그렇게
+적습니다. APK 링크는 릴리스 고정 주소라 새 빌드가 올라가도 그대로입니다.
+
+### 주소가 생기려면
 
 홈 화면 설치는 **https 주소**가 있어야 됩니다. 이 저장소는 GitHub Pages 가 이미
 켜져 있고 **기본 브랜치 루트**를 서비스하므로, `morning-brief/` 가 기본 브랜치에
-들어가면 바로 앱 주소가 생깁니다.
-
-    https://jihun32071-eng.github.io/test/morning-brief/
-
-기본 브랜치로 병합하는 것 외에 따로 할 설정은 없습니다.
+들어가면 바로 위 주소가 생깁니다. 병합 외에 따로 할 설정은 없습니다.
 
 > Actions 로 배포하는 워크플로를 두는 방법도 있지만, `github-pages` 환경은
 > 기본적으로 **기본 브랜치에서만** 배포를 허용합니다. 기능 브랜치에서 돌리면
@@ -58,6 +66,7 @@ APK 안에서는 PWA 조각(manifest·설치 버튼·서비스워커)이 걷힙�
 | `build-artifact.mjs` | 아티팩트 게시용 본문 생성 (`dist/artifact.html`) |
 | `strip-pwa.mjs` | PWA 조각 걷어내는 규칙. 아티팩트 빌드와 APK 빌드가 공유 |
 | `make-android-icons.sh` | `icon.svg` → 안드로이드 런처 아이콘 (`app/android-res/`) |
+| `install.html` | 사이트에서 설치·APK 받는 페이지 (Pages 전용, 앱에는 안 들어감) |
 | `실행.sh` | 로컬 서버 띄우고 브라우저 열기 |
 
 APK 껍데기는 저장소 루트의 `app/` 에 따로 있습니다 (`app/android-res/README.md` 참고).

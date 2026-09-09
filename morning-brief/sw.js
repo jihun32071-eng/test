@@ -2,11 +2,12 @@
    아침에 열자마자 떠야 하는 화면이라 캐시를 먼저 주고(stale-while-revalidate),
    새 버전은 뒤에서 받아 다음 실행에 반영합니다. 지하철·비행기 모드에서도 켜집니다.
    내용을 바꾸면 VERSION을 올려야 오래된 캐시가 정리됩니다. */
-var VERSION = "2026-09-09";
+var VERSION = "2026-09-09b";
 var CACHE = "morning-brief-" + VERSION;
 var SHELL = [
   "./",
   "./index.html",
+  "./install.html",
   "./app.webmanifest",
   "./icon.svg",
   "./icon-192.png",
