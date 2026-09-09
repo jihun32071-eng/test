@@ -5,10 +5,24 @@
 앱 전체입니다. 나머지 파일은 홈 화면에 설치하고 오프라인에서 열기 위한 껍데기입니다.
 
 ```bash
-python3 -m http.server 8000     # → http://localhost:8000
+sh 실행.sh                       # → http://localhost:8000
 ```
 
 `file://` 로 열어도 화면은 뜨지만 서비스워커(오프라인·설치)는 http(s)에서만 붙습니다.
+그래서 더블클릭 대신 작은 서버를 띄웁니다.
+
+## 휴대폰에 앱으로 넣기
+
+홈 화면 설치는 **https 주소**가 있어야 됩니다. 이 저장소에는 `morning-brief/` 를
+GitHub Pages 로 올리는 워크플로(`.github/workflows/pages.yml`)가 들어 있습니다.
+
+1. 저장소 **Settings → Pages → Source** 를 `GitHub Actions` 로 바꿉니다 (한 번만)
+2. 워크플로가 돌고 나면 `https://<사용자>.github.io/test/` 가 앱 주소가 됩니다
+3. **안드로이드·데스크톱 크롬** — 주소창의 설치 아이콘, 또는 앱 헤더의 "설치" 버튼
+   **iOS 사파리** — 공유 → 홈 화면에 추가 (`beforeinstallprompt` 가 없어 버튼은 안 뜹니다)
+
+설치하면 주소창 없이 뜨고, 비행기 모드에서도 열립니다. 기록은 그 기기의
+`localStorage` 에 남습니다.
 
 ## 파일
 
@@ -19,6 +33,7 @@ python3 -m http.server 8000     # → http://localhost:8000
 | `sw.js` | 오프라인 캐시. 내용을 바꾸면 안의 `VERSION` 을 올리세요 |
 | `icon.svg` / `icon-*.png` | 아이콘. PNG는 `icon.svg` 에서 뽑은 것이라 SVG가 원본입니다 |
 | `build-artifact.mjs` | 아티팩트 게시용 본문 생성 (`dist/artifact.html`) |
+| `실행.sh` | 로컬 서버 띄우고 브라우저 열기 |
 
 ## 어떻게 도는가
 

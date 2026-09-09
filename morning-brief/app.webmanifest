@@ -5,7 +5,6 @@
   "lang": "ko",
   "start_url": "./",
   "scope": "./",
-  "id": "/morning-brief/",
   "display": "standalone",
   "background_color": "#E6EAF1",
   "theme_color": "#E6EAF1",
