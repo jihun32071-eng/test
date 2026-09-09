@@ -626,6 +626,9 @@ function flushSave(dateKey){
 
 function applyDay(v){
   if(!v) return false;
+  /* db 스냅샷은 얼린 채로 옵니다 — "use strict" 아래에서는 t.done = true 같은
+     대입이 TypeError로 터지므로 그대로 쓰지 말고 복사본을 씁니다 */
+  try{ v = JSON.parse(JSON.stringify(v)); }catch(e){ return false; }
   if(v.first) day.first = v.first;
   if(Array.isArray(v.todos) && v.todos.length) day.todos = v.todos;
   if(Array.isArray(v.carry)) day.carry = v.carry;
@@ -676,7 +679,7 @@ function connect(){
 
     db.doc("state/checklist").get().then(function(snap){
       if(snap && snap.exists && Array.isArray(snap.data().items)){
-        checklist = snap.data().items;
+        checklist = JSON.parse(JSON.stringify(snap.data().items));
         renderChecklist();
       }
     }).catch(function(){});
