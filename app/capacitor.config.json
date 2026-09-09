@@ -1,0 +1,13 @@
+{
+  "appId": "com.jihun.digivicezero",
+  "appName": "디지바이스 제로",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#080c17",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

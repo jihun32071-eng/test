@@ -26,9 +26,13 @@
   --r:14px;
 }
 *{box-sizing:border-box}
+html{overscroll-behavior:none}
 body{
   margin:0;
   min-height:100vh;
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;          /* 더블탭 확대 방지 */
   background:
     radial-gradient(1100px 700px at 50% -10%, #16203a 0%, transparent 60%),
     radial-gradient(700px 500px at 100% 100%, #1a1330 0%, transparent 55%),
@@ -37,9 +41,14 @@ body{
   font-family:"IBM Plex Sans KR","Apple SD Gothic Neo",system-ui,sans-serif;
   display:flex;
   justify-content:center;
-  padding:18px 12px 40px;
+  padding:
+    max(18px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(40px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   -webkit-font-smoothing:antialiased;
 }
+/* 네이티브 앱: 게임 UI는 선택 불가, 입력란만 예외 */
+body.native{user-select:none;-webkit-user-select:none}
+body.native input{user-select:text;-webkit-user-select:text}
 button{font-family:inherit}
 .device{
   width:100%;
@@ -1306,7 +1315,7 @@ $("#modal").addEventListener("click", e=>{
   const k=b.dataset.modal;
   if(k==="close") closeModal();
   else if(k==="name"){
-    const el=$("#nickIn"); S.nick=(el&&el.value.trim())||S.form;
+    const el=$("#nickIn"); S.nick=(el&&el.value.trim())||S.form; S.needName=false;
     log("<b>"+S.nick+"</b>(이)라고 이름 지었다.");
     closeModal(); updateUI();
   }
@@ -1353,6 +1362,34 @@ function load(){
     return Object.assign(base,d,{t:Object.assign(base.t,d.t||{}),foc:Object.assign(base.foc,d.foc||{})});
   }catch(e){ return null; }
 }
+/* =========================================================================
+   네이티브 앱(Capacitor) 연동 — 웹에서는 전부 무시된다
+   ========================================================================= */
+let lastBack=0;
+function initNative(){
+  const cap=window.Capacitor;
+  if(!cap || typeof cap.isNativePlatform!=="function" || !cap.isNativePlatform()) return;
+  document.body.classList.add("native");
+  const reg = (window.capacitorExports && window.capacitorExports.registerPlugin) || cap.registerPlugin;
+  const App = (cap.Plugins && cap.Plugins.App) || (reg && reg("App"));
+  if(!App || !App.addListener) return;
+
+  App.addListener("backButton", ()=>{
+    if($("#modal").classList.contains("on")){
+      if(!S.needName) closeModal();          // 이름 짓기는 뒤로가기로 건너뛸 수 없다
+      return;
+    }
+    if(view==="battle"){ toast("전투 중에는 나갈 수 없다"); return; }
+    if(view==="traingame") return;
+    if(view!=="main"){ view="main"; updateUI(); return; }
+    if(Date.now()-lastBack < 1800){ save(); App.exitApp(); }
+    else { lastBack=Date.now(); toast("한 번 더 누르면 종료"); }
+  });
+  App.addListener("appStateChange", st=>{ if(st && st.isActive===false) save(); });
+  App.addListener("pause", save);
+  log("<i>앱 모드로 실행 중.</i>");
+}
+
 function boot(){
   const l=load();
   if(l){
@@ -1365,7 +1402,7 @@ function boot(){
     S=newPet(1);
     log("<b>디지타마를 받았다.</b> 곧 부화한다…");
   }
-  updateUI(); draw();
+  updateUI(); draw(); initNative();
   setInterval(()=>{ if(!battle) advance(0.5*speed); updateUI(); }, 250);
   setInterval(save, 4000);
   window.addEventListener("beforeunload", save);

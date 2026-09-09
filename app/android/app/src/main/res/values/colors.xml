@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 게임 UI와 동일한 팔레트 -->
+    <color name="void_bg">#080C17</color>
+    <color name="shell">#1C2540</color>
+    <color name="amber">#FF8A3D</color>
+    <color name="cyan">#4EE1D0</color>
+    <color name="colorPrimary">#1C2540</color>
+    <color name="colorPrimaryDark">#080C17</color>
+    <color name="colorAccent">#FF8A3D</color>
+</resources>

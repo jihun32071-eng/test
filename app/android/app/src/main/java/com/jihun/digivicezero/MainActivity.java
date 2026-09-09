@@ -1,0 +1,5 @@
+package com.jihun.digivicezero;
+
+import com.getcapacitor.BridgeActivity;
+
+public class MainActivity extends BridgeActivity {}
