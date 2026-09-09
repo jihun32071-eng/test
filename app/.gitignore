@@ -1,0 +1,3 @@
+node_modules/
+# sync-web.mjs 가 digimon/index.html 에서 생성한다 (원본 중복 방지)
+www/

@@ -1,0 +1,65 @@
+name: 안드로이드 APK 빌드
+
+on:
+  push:
+    paths:
+      - 'app/**'
+      - 'digimon/index.html'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: 의존성 설치
+        working-directory: app
+        run: npm ci
+
+      - name: 웹 자산 동기화
+        working-directory: app
+        run: npm run sync
+
+      - name: 디버그 APK 빌드
+        working-directory: app/android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: APK 이름 정리
+        run: cp app/android/app/build/outputs/apk/debug/app-debug.apk digivice-zero.apk
+
+      - name: APK 업로드 (Actions 아티팩트)
+        uses: actions/upload-artifact@v4
+        with:
+          name: digivice-zero-debug-apk
+          path: digivice-zero.apk
+          if-no-files-found: error
+
+      # 로그인 없이 브라우저에서 바로 받을 수 있는 고정 링크를 만든다.
+      # 태그 apk 는 항상 최신 빌드를 가리킨다.
+      - name: 릴리스에 APK 올리기
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view apk >/dev/null 2>&1 || gh release create apk \
+            --title "디지바이스 제로 — 안드로이드 APK" \
+            --notes "디지몬 스타일 육성 배틀 게임. 아래 digivice-zero.apk 를 눌러 받은 뒤 설치하세요. 설치하려면 폰 설정에서 '출처를 알 수 없는 앱 설치'를 허용해야 합니다. 이 태그는 항상 최신 빌드를 가리킵니다."
+          gh release upload apk digivice-zero.apk --clobber
+          echo "다운로드 링크: https://github.com/${{ github.repository }}/releases/download/apk/digivice-zero.apk"
