@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="아침 브리핑">
+  <rect width="512" height="512" rx="114" fill="#151D28"/>
+  <g stroke="#E9AB5C" stroke-width="17" stroke-linecap="round" opacity=".85">
+    <line x1="256" y1="96"  x2="256" y2="140"/>
+    <line x1="140" y1="144" x2="171" y2="175"/>
+    <line x1="372" y1="144" x2="341" y2="175"/>
+    <line x1="92"  y1="262" x2="136" y2="262"/>
+    <line x1="420" y1="262" x2="376" y2="262"/>
+  </g>
+  <path d="M152 322 A104 104 0 0 1 360 322 Z" fill="#E9AB5C"/>
+  <rect x="76" y="322" width="360" height="18" rx="9" fill="#E6EAF1"/>
+  <rect x="76" y="386" width="220" height="16" rx="8" fill="#48546A"/>
+  <rect x="76" y="430" width="150" height="16" rx="8" fill="#48546A"/>
+</svg>

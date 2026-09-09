@@ -1,0 +1,1125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="아침에 30초 안에 훑고 바로 움직이는 브리핑 — 첫 일정, 챙길 것, 할 일 3가지, 덕질 일정, 어제 기록, 오늘의 의도.">
+<!--pwa:start-->
+<link rel="manifest" href="app.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#E6EAF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D131B" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="아침 브리핑">
+<!--pwa:end-->
+<title>드로의 아침 브리핑</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#E6EAF1;
+  --surface:#FFFFFF;
+  --surface-2:#F1F4F9;
+  --line:#D0D8E4;
+  --line-soft:#E1E6EE;
+  --ink:#151C27;
+  --ink-2:#48546A;
+  --ink-3:#7A8598;
+  --accent:#9A5A12;
+  --accent-2:#C07C24;
+  --accent-soft:#F5E8D6;
+  --good:#1C7355;
+  --crit:#A8253B;
+  --real:#8A6D22;
+  --lg:#A50034;
+  --t1:#CE0028;
+  --shadow:0 1px 2px rgba(21,28,39,.05), 0 8px 24px -16px rgba(21,28,39,.28);
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D131B;
+    --surface:#151D28;
+    --surface-2:#1C2733;
+    --line:#2A3645;
+    --line-soft:#212C39;
+    --ink:#E5EBF4;
+    --ink-2:#A3B0C1;
+    --ink-3:#707C8C;
+    --accent:#E9AB5C;
+    --accent-2:#F0BE7E;
+    --accent-soft:#33270F;
+    --good:#5FCFA3;
+    --crit:#F08492;
+    --real:#D9B551;
+    --lg:#F45C86;
+    --t1:#FF5A74;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -18px rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D131B;
+  --surface:#151D28;
+  --surface-2:#1C2733;
+  --line:#2A3645;
+  --line-soft:#212C39;
+  --ink:#E5EBF4;
+  --ink-2:#A3B0C1;
+  --ink-3:#707C8C;
+  --accent:#E9AB5C;
+  --accent-2:#F0BE7E;
+  --accent-soft:#33270F;
+  --good:#5FCFA3;
+  --crit:#F08492;
+  --real:#D9B551;
+  --lg:#F45C86;
+  --t1:#FF5A74;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -18px rgba(0,0,0,.9);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+img{max-width:100%}
+[hidden]{display:none !important}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:1060px;margin:0 auto;
+  padding:calc(22px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+          calc(64px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+}
+
+/* ---------- header ---------- */
+.top{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px 22px;
+  padding-bottom:16px;margin-bottom:18px;
+  border-bottom:1px solid var(--line);
+}
+.top h1{
+  font-family:"Gowun Batang","Nanum Myeongjo",serif;
+  font-weight:700;font-size:clamp(26px,4.6vw,36px);
+  margin:0;letter-spacing:-.01em;text-wrap:balance;line-height:1.15;
+}
+.top .date{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;
+  margin:0 0 4px;
+}
+.topright{margin-left:auto;display:flex;align-items:center;gap:10px}
+.clock{
+  font-family:"IBM Plex Mono",monospace;font-size:26px;font-weight:500;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1;
+}
+.sync{
+  font-size:11px;color:var(--ink-3);letter-spacing:.04em;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+.sync.on .dot{background:var(--good)}
+.acts{display:flex;gap:6px}
+.iconbtn{
+  font:inherit;font-size:12px;cursor:pointer;white-space:nowrap;
+  padding:4px 10px;border-radius:7px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+}
+.iconbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ---------- cards ---------- */
+.brief{display:grid;gap:14px;grid-template-columns:1fr;align-items:start}
+@media (min-width:880px){
+  .brief{grid-template-columns:1.06fr 1fr}
+}
+.col{display:grid;gap:14px;align-content:start}
+.card{
+  background:var(--surface);
+  border:1px solid var(--line-soft);
+  border-radius:var(--r);
+  padding:15px 16px 16px;
+  box-shadow:var(--shadow);
+}
+.card > * + *{margin-top:10px}
+.ask{
+  font-size:11.5px;letter-spacing:.09em;color:var(--accent);
+  font-weight:600;margin:0;
+}
+.ttl{
+  font-family:"Gowun Batang",serif;font-size:17px;font-weight:700;
+  margin:2px 0 0;letter-spacing:-.01em;
+}
+.hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.hd .side{font-size:11.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+
+/* ---------- 오늘 일정 ---------- */
+.countdown{
+  display:flex;align-items:baseline;gap:9px;
+  font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;
+}
+.countdown .big{font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.countdown .unit{font-size:13px;color:var(--ink-3)}
+.countdown.urgent .big{color:var(--crit)}
+@media (max-width:560px){
+  /* 좁은 화면에서 "4시간 41분"이 두 줄로 접히지 않게 설명을 아래로 내립니다 */
+  .countdown{flex-wrap:wrap;row-gap:2px}
+  .countdown .unit{flex:1 0 100%}
+}
+.firstline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type="time"],.txt{
+  font:inherit;color:inherit;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:7px;padding:6px 9px;
+}
+input[type="time"]{font-family:"IBM Plex Mono",monospace;min-width:138px;flex:0 0 auto}
+.txt{flex:1 1 130px;min-width:0}
+.txt::placeholder{color:var(--ink-3)}
+
+/* ---------- chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  font:inherit;font-size:13px;cursor:pointer;
+  background:var(--surface-2);color:var(--ink-2);
+  border:1px solid var(--line);border-radius:999px;
+  padding:4px 11px;transition:background .12s,color .12s,border-color .12s;
+}
+.chip[aria-pressed="true"]{
+  background:var(--accent-soft);border-color:var(--accent);
+  color:var(--accent);font-weight:600;
+}
+
+/* ---------- 할 일 ---------- */
+.todos{display:grid;gap:7px}
+.todo{
+  display:flex;align-items:center;gap:9px;
+  background:var(--surface-2);border:1px solid var(--line-soft);
+  border-radius:8px;padding:7px 10px;
+}
+.todo .rank{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  width:12px;flex:none;
+}
+.todo input[type="text"]{
+  flex:1;min-width:0;font:inherit;background:none;border:0;color:inherit;padding:0;
+}
+.todo input[type="text"]:focus{outline:none}
+.todo.done input[type="text"]{text-decoration:line-through;color:var(--ink-3)}
+input[type="checkbox"]{
+  appearance:none;-webkit-appearance:none;width:17px;height:17px;flex:none;
+  border:1.5px solid var(--line);border-radius:5px;background:var(--surface);
+  cursor:pointer;position:relative;margin:0;
+}
+input[type="checkbox"]:checked{background:var(--accent);border-color:var(--accent)}
+input[type="checkbox"]:checked::after{
+  content:"";position:absolute;left:5px;top:1px;width:4px;height:9px;
+  border:solid var(--surface);border-width:0 2px 2px 0;transform:rotate(43deg);
+}
+
+/* ---------- 덕질 ---------- */
+.teams{display:grid;gap:9px}
+.team{
+  display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center;
+  padding:9px 0;border-top:1px solid var(--line-soft);
+}
+.team:first-child{border-top:0;padding-top:2px}
+.badge{
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  padding:2px 8px;border-radius:5px;white-space:nowrap;
+  border:1px solid currentColor;
+}
+.badge.real{color:var(--real)}
+.badge.lg{color:var(--lg)}
+.badge.t1{color:var(--t1)}
+.badge.res{color:var(--ink-3)}
+.team .next{font-size:14px;min-width:0}
+.team .next b{font-weight:600}
+.team .when{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;
+}
+.dday{
+  font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600;
+  padding:3px 8px;border-radius:6px;white-space:nowrap;
+  background:var(--surface-2);color:var(--ink-2);
+}
+.dday.soon{background:var(--accent-soft);color:var(--accent)}
+.team .prev{
+  grid-column:2 / -1;font-size:12.5px;color:var(--ink-3);
+  display:flex;align-items:center;gap:6px;
+}
+.team .prev input{
+  font:inherit;font-size:12.5px;background:none;border:0;border-bottom:1px dashed var(--line);
+  color:var(--ink-2);padding:0 2px 1px;flex:1;min-width:0;
+}
+.team .prev input:focus{outline:none;border-bottom-color:var(--accent)}
+.dawn{
+  font-size:10.5px;letter-spacing:.06em;color:var(--ink-3);
+  border:1px solid var(--line);border-radius:4px;padding:1px 5px;white-space:nowrap;
+}
+
+/* ---------- 기록 ---------- */
+.rec{display:grid;grid-template-columns:auto 1fr;gap:9px 12px;align-items:center}
+.rec .lab{font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.seg{display:flex;gap:4px}
+.seg button{
+  font:inherit;font-family:"IBM Plex Mono",monospace;font-size:12.5px;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);
+  border-radius:6px;padding:3px 0;flex:1;
+}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.pace{
+  font-size:13px;background:var(--surface-2);border-left:2px solid var(--accent);
+  padding:7px 11px;border-radius:0 7px 7px 0;color:var(--ink-2);
+}
+.spark{display:block;width:100%;height:46px}
+.spark .fill{fill:var(--accent);opacity:.14}
+.spark .ln{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linejoin:round;stroke-linecap:round}
+.spark .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.spark .end{fill:var(--accent)}
+.sparkcap{
+  display:flex;justify-content:space-between;gap:10px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-3);
+  margin-top:4px;
+}
+
+/* ---------- 한 줄 ---------- */
+.quote{
+  font-family:"Gowun Batang",serif;font-size:17px;line-height:1.55;
+  border:0;background:none;color:var(--ink);width:100%;resize:none;
+  padding:0;overflow:hidden;
+}
+.quote:focus{outline:none}
+
+/* ---------- 하단 ---------- */
+.section{margin-top:30px}
+.section > h2{
+  font-family:"Gowun Batang",serif;font-size:19px;margin:0 0 3px;
+}
+.section > p.sub{margin:0 0 13px;font-size:13px;color:var(--ink-3)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+.tab{
+  font:inherit;font-size:13px;cursor:pointer;padding:5px 12px;border-radius:7px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+}
+.tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground);font-weight:600}
+.tblwrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;min-width:430px;font-size:13.5px}
+th,td{padding:8px 13px;text-align:left;border-bottom:1px solid var(--line-soft);white-space:nowrap}
+th{
+  font-size:11px;letter-spacing:.07em;color:var(--ink-3);font-weight:600;
+  background:var(--surface-2);
+}
+tr:last-child td{border-bottom:0}
+td.mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+tr.hl td{background:var(--accent-soft)}
+tr.hl td.opp{font-weight:600;color:var(--accent)}
+tr.past td{color:var(--ink-3)}
+.tagline{font-size:11px;color:var(--accent);margin-left:7px;font-weight:600}
+
+.two{display:grid;gap:14px;grid-template-columns:1fr}
+@media (min-width:880px){.two{grid-template-columns:1fr 1fr}}
+.links{display:grid;gap:3px;margin:0;padding:0;list-style:none}
+.links li{display:flex;gap:9px;align-items:baseline;font-size:13.5px;padding:3px 0}
+.links .k{font-size:11px;color:var(--ink-3);width:52px;flex:none;letter-spacing:.04em}
+a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+a:hover{border-bottom-color:var(--accent)}
+.note{font-size:12.5px;color:var(--ink-3);margin:9px 0 0}
+.foot{margin-top:34px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+
+</head>
+<body>
+
+<script>
+/* 렌더 전에 저장된 테마를 먼저 붙인다 — 안 그러면 어두운 테마에서 한 프레임이 하얗게 뜬다 */
+try{var _t=localStorage.getItem("morningBrief:theme");if(_t==="dark"||_t==="light")document.documentElement.setAttribute("data-theme",_t);}catch(e){}
+</script>
+
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="date" id="dateline">2026.09.09 WED</p>
+      <h1 id="greet">좋은 아침이에요</h1>
+    </div>
+    <div class="topright">
+      <div class="clock" id="clock">--:--</div>
+      <div class="sync" id="sync"><span class="dot"></span><span id="syncTxt">이 기기에만 저장</span></div>
+      <div class="acts">
+        <button type="button" class="iconbtn" id="themeBtn" aria-label="테마 전환">자동</button>
+        <!--pwa:start--><button type="button" class="iconbtn" id="installBtn" hidden>설치</button><!--pwa:end-->
+      </div>
+    </div>
+  </header>
+
+  <div class="brief">
+    <div class="col">
+
+      <section class="card">
+        <div class="hd">
+          <div><p class="ask">지금 나가야 하나?</p><h2 class="ttl">오늘 일정</h2></div>
+          <span class="side" id="firstMeta"></span>
+        </div>
+        <div class="countdown" id="cd"><span class="big">--</span><span class="unit">첫 일정까지</span></div>
+        <div class="firstline">
+          <input type="time" id="firstTime" aria-label="첫 일정 시각">
+          <input type="text" class="txt" id="firstLabel" placeholder="첫 일정 이름" aria-label="첫 일정 이름">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd">
+          <div><p class="ask">오늘 뭘 끝내나?</p><h2 class="ttl">할 일 3가지</h2></div>
+          <span class="side" id="todoMeta">0/3</span>
+        </div>
+        <div class="todos" id="todos"></div>
+        <p class="note">전체 목록이 아니라 상위 3개만. 네 번째가 생각나면 그건 내일 것.</p>
+      </section>
+
+      <section class="card">
+        <div class="hd">
+          <div><p class="ask">오늘 페이스 조절</p><h2 class="ttl">어제 기록</h2></div>
+          <span class="side" id="recDate"></span>
+        </div>
+        <div class="rec">
+          <span class="lab">수면</span>
+          <div class="seg" id="segSleep"></div>
+          <span class="lab">운동</span>
+          <div class="seg" id="segWorkout"></div>
+          <span class="lab">컨디션</span>
+          <div class="seg" id="segCond"></div>
+        </div>
+        <p class="pace" id="pace">수면 시간을 찍으면 오늘 페이스를 잡아드려요.</p>
+        <svg class="spark" id="spark" viewBox="0 0 300 46" preserveAspectRatio="none" role="img" aria-label="최근 7일 수면 시간 추이"></svg>
+        <div class="sparkcap" id="sparkcap"></div>
+      </section>
+
+    </div>
+
+    <div class="col">
+
+      <section class="card">
+        <div class="hd">
+          <div><p class="ask">뭘 챙기나?</p><h2 class="ttl">오늘 챙길 것</h2></div>
+          <a class="side" href="https://www.weather.go.kr/w/weather/forecast/short-term.do" target="_blank" rel="noopener">기상청 ↗</a>
+        </div>
+        <div class="chips" id="carry"></div>
+        <p class="note">날씨는 링크로 30초 확인하고, 손에 들 것만 여기 눌러두세요.</p>
+      </section>
+
+      <section class="card">
+        <div class="hd">
+          <div><p class="ask">오늘 밤 뭘 보나?</p><h2 class="ttl">덕질 일정</h2></div>
+          <span class="side">어제 결과 → 다음 경기</span>
+        </div>
+        <div class="teams" id="teams"></div>
+        <p class="note" id="kboNote"></p>
+      </section>
+
+      <section class="card">
+        <p class="ask">오늘의 의도</p>
+        <textarea class="quote" id="quote" rows="2" aria-label="한 줄 문장"></textarea>
+      </section>
+
+    </div>
+  </div>
+
+  <section class="section">
+    <h2>전체 일정</h2>
+    <p class="sub">시간은 모두 한국시간(KST). 새벽 경기는 전날 밤에 보는 것으로 계산했습니다.</p>
+    <div class="tabs" id="tabs"></div>
+    <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+    <p class="note" id="tblNote"></p>
+  </section>
+
+  <div class="section two">
+    <section>
+      <h2>다음 단계</h2>
+      <p class="sub">2주 굴려보고 안 보게 되는 항목은 지웁니다.</p>
+      <div class="card"><div class="todos" id="checklist"></div></div>
+    </section>
+    <section>
+      <h2>소스</h2>
+      <p class="sub">브리핑에 안 들어가는 건 여기서 직접 확인합니다.</p>
+      <div class="card">
+        <ul class="links">
+          <li><span class="k">축구</span><a href="https://www.laliga.com/en-GB/laliga-easports/results" target="_blank" rel="noopener">라리가 일정·결과</a></li>
+          <li><span class="k"></span><a href="https://www.uefa.com/uefachampionsleague/fixtures-results/" target="_blank" rel="noopener">UEFA 챔피언스리그</a></li>
+          <li><span class="k">야구</span><a href="https://www.koreabaseball.com/Schedule/Schedule.aspx" target="_blank" rel="noopener">KBO 경기일정</a></li>
+          <li><span class="k"></span><a href="https://www.lgtwins.com" target="_blank" rel="noopener">LG 트윈스 구단</a></li>
+          <li><span class="k">e스포츠</span><a href="https://lolesports.com/ko-KR" target="_blank" rel="noopener">LoL Esports 일정</a></li>
+          <li><span class="k"></span><a href="https://t1.fan/schedule" target="_blank" rel="noopener">T1 공식 스케줄</a></li>
+          <li><span class="k">리센느</span><a href="https://blip.kr/artists/RESCENE/schedule" target="_blank" rel="noopener">Blip — 음방·컴백</a></li>
+        </ul>
+        <p class="note">리센느 라이브는 예고 없이 켜지니 유튜브 채널 알림이 유일한 방법입니다. 브리핑에는 넣지 않습니다.</p>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot" id="foot">「아침 브리핑 구성안」(2026.09.09) 기준 · 항목 6개 · 읽고 나서 할 일이 정해지지 않으면 뺍니다.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== 데이터 ===================== */
+var LIGA = [
+  {d:"2026-09-13",t:"04:00",opp:"라요 바예카노",ha:"홈"},
+  {d:"2026-09-16",t:"04:30",opp:"엘체",ha:"원정"},
+  {d:"2026-09-20",t:"23:15",opp:"아틀레티코 마드리드",ha:"원정",tag:"마드리드 더비"},
+  {d:"2026-10-12",t:"04:00",opp:"비야레알",ha:"홈"},
+  {d:"2026-10-19",t:"04:00",opp:"세비야",ha:"홈"},
+  {d:"2026-10-26",t:"05:00",opp:"FC 바르셀로나",ha:"원정",tag:"엘 클라시코"},
+  {d:"2026-11-02",t:"04:00",opp:"라싱 산탄데르",ha:"원정"},
+  {d:"2026-11-09",t:"04:00",opp:"발렌시아",ha:"원정"},
+  {d:"2026-11-23",t:"04:00",opp:"셀타 비고",ha:"홈"},
+  {d:"2026-11-30",t:"04:00",opp:"알라베스",ha:"홈"}
+];
+var UCL = [
+  {d:"2026-10-15",t:"04:00",opp:"AS 로마",ha:"원정"},
+  {d:"2026-10-22",t:"04:00",opp:"RB 라이프치히",ha:"홈"},
+  {d:"2026-11-05",t:"02:45",opp:"AEK 아테네",ha:"원정"},
+  {d:"2026-11-25",t:"05:00",opp:"PSV 에인트호번",ha:"홈"},
+  {d:"2026-12-10",t:"05:00",opp:"아스날",ha:"원정"},
+  {d:"2027-01-20",t:"05:00",opp:"LASK 린츠",ha:"홈"},
+  {d:"2027-01-28",t:"05:00",opp:"샤흐타르 도네츠크",ha:"원정"}
+];
+var KBO = [
+  {d:"2026-09-09",t:"18:30",opp:"한화 이글스",ha:"원정",place:"대전"},
+  {d:"2026-09-12",opp:"삼성 라이온즈",ha:"원정",place:"대구",span:"9/12~9/13"},
+  {d:"2026-09-15",opp:"NC 다이노스",ha:"원정",place:"창원",span:"9/15~9/16"},
+  {opp:"kt wiz",ha:"원정",place:"수원",span:"9월 셋째주"},
+  {opp:"한화 이글스",ha:"홈",place:"잠실",span:"9월 셋째주"},
+  {opp:"롯데 자이언츠",ha:"홈",place:"잠실",span:"9월 넷째주"},
+  {d:"2026-09-26",opp:"KIA 타이거즈",ha:"원정",place:"광주",span:"9/26~9/27"},
+  {opp:"SSG 랜더스",ha:"원정",place:"문학",span:"9월 말~10월 초"}
+];
+var LCK = [ {d:"2026-09-12",opp:"한화생명e스포츠"} ];
+
+var CARRY = ["우산","겉옷","텀블러","이어폰","보조배터리","선크림","장바구니"];
+var SLEEP = [4,5,5.5,6,6.5,7,7.5,8];
+var COND  = ["나쁨","그럭저럭","좋음"];
+var QUOTES = [
+  "오늘 끝낼 세 가지만 붙잡는다.",
+  "새벽 경기는 하이라이트로도 충분하다.",
+  "서두르기 전에 30초만 훑는다.",
+  "잘 잔 날이 잘 되는 날이다.",
+  "안 보게 되는 항목은 지운다.",
+  "지금 나가면 늦지 않는다.",
+  "오늘의 컨디션에 오늘의 계획을 맞춘다."
+];
+var SEED_TODOS = [
+  "레알 마드리드 경기 캘린더 일괄 등록",
+  "리센느 유튜브 채널 알림 켜기",
+  "아침 브리핑 확인 시간 정하기"
+];
+var SEED_CHECK = [
+  "레알 마드리드 경기를 캘린더에 일괄 등록 (알림: 시작 30분 전)",
+  "리센느 유튜브 채널 알림 켜기",
+  "아침 브리핑 확인 시간 정하기 (예: 기상 후 세수 전)",
+  "2주 운영해보고 안 보게 되는 항목 삭제"
+];
+
+/* ===================== 날짜 유틸 ===================== */
+var WD = ["일","월","화","수","목","금","토"];
+var WDE = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+function ymd(dt){
+  return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+}
+function parseD(s){ var p=s.split("-"); return new Date(+p[0],+p[1]-1,+p[2]); }
+function midnight(dt){ return new Date(dt.getFullYear(),dt.getMonth(),dt.getDate()); }
+function addDays(dt,n){ var x=new Date(dt.getTime()); x.setDate(x.getDate()+n); return x; }
+function md(s){ var p=s.split("-"); return (+p[1])+"/"+(+p[2]); }
+function wdOf(s){ return WD[parseD(s).getDay()]; }
+function isDawn(t){ return !!t && parseInt(t.slice(0,2),10) < 6; }
+/* 새벽 경기는 전날 밤에 본다 — 체감 날짜로 환산 */
+function watchNight(m){
+  var dt = parseD(m.d);
+  if(isDawn(m.t)) dt = addDays(dt,-1);
+  return dt;
+}
+function ddayFrom(today, night){
+  return Math.round((night.getTime()-today.getTime())/86400000);
+}
+function ddayLabel(n, dawn){
+  if(n===0) return dawn ? "오늘 밤" : "오늘";
+  if(n===1) return dawn ? "내일 밤" : "내일";
+  if(n<0) return "지난 경기";
+  return "D-"+n;
+}
+
+var SEED_DATE = "2026-09-09";   /* 구성안 작성일 — 시연용 초기값은 이 날짜에만 들어갑니다 */
+var now = new Date();
+var today = midnight(now);
+var todayKey = ymd(today);
+
+/* ===================== 상태 ===================== */
+function blankDay(){
+  return {
+    date: todayKey,
+    first: {time:"", label:""},
+    todos: [],
+    carry: [],
+    rec: {sleep:null, workout:null, cond:null},
+    results: {real:"", lg:"", t1:""},
+    quote: ""
+  };
+}
+var day = blankDay();
+var checklist = SEED_CHECK.map(function(t){ return {text:t, done:false}; });
+var history = [];
+var db = null, saveTimer = null;
+
+/* 저장된 게 없는 날의 시작점.
+   할 일 씨앗과 레알 결과는 구성안 작성일에만 넣습니다 — 매일 다시 깔리면
+   이틀째부터는 남의 할 일이 적힌 카드를 보게 되니까요. 첫 일정은 그날
+   LG 경기가 있으면 중계 시각으로 채워둡니다. */
+function defaults(){
+  if(todayKey === SEED_DATE){
+    day.todos = SEED_TODOS.map(function(t){ return {text:t, done:false}; });
+    day.results.real = "9/9 인터 밀란 2-1 승 (홈)";
+  }
+  var todayGame = KBO.filter(function(m){ return m.d===todayKey; })[0];
+  if(todayGame && todayGame.t){
+    day.first = {time:todayGame.t, label:"LG vs "+todayGame.opp+" ("+todayGame.place+" 중계)"};
+  }
+}
+
+/* ===================== 저장 =====================
+   기본은 브라우저 localStorage. 아티팩트로 게시되어 db 캐퍼빌리티가
+   붙으면 같은 내용을 서버에도 써서 기기 간에 이어집니다. */
+var LS = "morningBrief:";
+function lsSet(k,v){ try{ localStorage.setItem(LS+k, JSON.stringify(v)); }catch(e){} }
+function lsGet(k){ try{ var s=localStorage.getItem(LS+k); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+
+function persist(key){
+  var k = key || todayKey;
+  var body = JSON.parse(JSON.stringify(day));
+  body.date = k;
+  lsSet("days/"+k, body);
+  lsSet("checklist", checklist);
+  if(db){
+    db.doc("days/"+k).set(body).catch(function(){});
+    db.doc("state/checklist").set({items:checklist}).catch(function(){});
+  }
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){ saveTimer = null; persist(); }, 700);
+}
+/* 대기 중인 저장을 지금 확정 — 자정 넘김·탭 종료 직전에 씁니다 */
+function flushSave(dateKey){
+  if(saveTimer === null) return;
+  clearTimeout(saveTimer); saveTimer = null;
+  persist(dateKey);
+}
+
+function applyDay(v){
+  if(!v) return false;
+  if(v.first) day.first = v.first;
+  if(Array.isArray(v.todos) && v.todos.length) day.todos = v.todos;
+  if(Array.isArray(v.carry)) day.carry = v.carry;
+  if(v.rec) day.rec = v.rec;
+  if(v.results) day.results = v.results;
+  if(typeof v.quote === "string") day.quote = v.quote;
+  return true;
+}
+
+function loadLocal(){
+  var had = applyDay(lsGet("days/"+todayKey));
+  var c = lsGet("checklist");
+  if(Array.isArray(c) && c.length) checklist = c;
+  history = [];
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf(LS+"days/") === 0){
+        var v = JSON.parse(localStorage.getItem(k));
+        if(v && v.date) history.push(v);
+      }
+    }
+  }catch(e){}
+  history.sort(function(a,b){ return a.date < b.date ? 1 : -1; });
+  return had;
+}
+
+/* 새 날의 첫 방문 — 어제 못 끝낸 할 일만 넘겨받습니다.
+   끝낸 일·챙길 것·기록은 그날 것이므로 넘기지 않습니다. */
+function carryOver(){
+  var prev = history.filter(function(v){ return v.date < todayKey; })[0];
+  if(!prev || !Array.isArray(prev.todos)) return;
+  var left = prev.todos.filter(function(t){ return t && t.text && !t.done; })
+                       .map(function(t){ return {text:t.text, done:false}; });
+  if(left.length) day.todos = left.slice(0,3);
+}
+
+function connect(){
+  if(!window.claude || !window.claude.use) return;
+  window.claude.use("db").then(function(store){
+    if(!store) return;
+    db = store;
+    var s = document.getElementById("sync");
+    s.classList.add("on");
+    document.getElementById("syncTxt").textContent = "모든 기기에 저장";
+
+    pullDay();
+
+    db.doc("state/checklist").get().then(function(snap){
+      if(snap && snap.exists && Array.isArray(snap.data().items)){
+        checklist = snap.data().items;
+        renderChecklist();
+      }
+    }).catch(function(){});
+
+    pullHistory();
+  }).catch(function(){});
+}
+function pullDay(){
+  if(!db) return;
+  db.doc("days/"+todayKey).get().then(function(snap){
+    if(snap && snap.exists){ applyDay(snap.data()); renderAll(); }
+    else { scheduleSave(); }
+  }).catch(function(){});
+}
+function pullHistory(){
+  if(!db) return;
+  db.collection("days").orderBy("date","desc").limit(14).get().then(function(q){
+    history = q.docs.map(function(d){ return d.data(); }).filter(Boolean);
+    renderSpark();
+  }).catch(function(){});
+}
+
+/* ===================== 헤더 ===================== */
+function renderHeader(){
+  document.getElementById("dateline").textContent =
+    today.getFullYear()+"."+String(today.getMonth()+1).padStart(2,"0")+"."+String(today.getDate()).padStart(2,"0")+" "+WDE[today.getDay()];
+  var h = now.getHours();
+  var g = h<5 ? "아직 새벽이에요" : h<9 ? "좋은 아침이에요" : h<12 ? "오전이 지나가는 중" : h<18 ? "오후예요" : "오늘 밤 브리핑";
+  document.getElementById("greet").textContent = g;
+}
+function tickClock(){
+  var n = new Date();
+  document.getElementById("clock").textContent =
+    String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");
+  if(ymd(n) !== todayKey){ rollover(n); return; }
+  now = n;
+  renderCountdown();
+}
+/* 켜둔 채로 날이 바뀌면 어제 것을 확정 저장하고 새 날짜로 갈아끼웁니다.
+   이게 없으면 첫 일정 카운트다운이 어제 날짜로 계산돼 계속 "지남"으로 남습니다. */
+function rollover(n){
+  var was = todayKey;
+  flushSave(was);
+  now = n;
+  today = midnight(n);
+  todayKey = ymd(today);
+  day = blankDay();
+  defaults();
+  if(!loadLocal()) carryOver();
+  renderHeader();
+  renderAll();
+  renderTabs();
+  pullDay(); pullHistory();
+}
+
+/* ===================== 오늘 일정 ===================== */
+function renderCountdown(){
+  var cd = document.getElementById("cd");
+  var meta = document.getElementById("firstMeta");
+  if(!day.first.time){
+    cd.classList.remove("urgent");
+    cd.innerHTML = '<span class="big">—</span><span class="unit">고정 일정 없음</span>';
+    meta.textContent = "여유 있는 날";
+    return;
+  }
+  var p = day.first.time.split(":");
+  var target = new Date(now.getFullYear(),now.getMonth(),now.getDate(),+p[0],+p[1],0);
+  var diff = target.getTime() - Date.now();
+  meta.textContent = day.first.time;
+  if(diff <= 0){
+    cd.classList.remove("urgent");
+    cd.innerHTML = '<span class="big">지남</span><span class="unit">'+(day.first.label||"첫 일정")+'</span>';
+    return;
+  }
+  var mins = Math.floor(diff/60000);
+  var hh = Math.floor(mins/60), mm = mins%60;
+  cd.classList.toggle("urgent", mins <= 45);
+  cd.innerHTML = '<span class="big">'+(hh>0 ? hh+"시간 "+mm+"분" : mm+"분")+'</span><span class="unit">'+
+                 (day.first.label ? esc(day.first.label)+" 전" : "첫 일정까지")+'</span>';
+}
+function renderFirst(){
+  document.getElementById("firstTime").value = day.first.time || "";
+  document.getElementById("firstLabel").value = day.first.label || "";
+  renderCountdown();
+}
+
+/* ===================== 할 일 ===================== */
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+function renderTodos(){
+  var box = document.getElementById("todos");
+  box.textContent = "";
+  for(var i=0;i<3;i++){
+    (function(i){
+      var t = day.todos[i] || (day.todos[i] = {text:"",done:false});
+      var row = document.createElement("div");
+      row.className = "todo" + (t.done ? " done" : "");
+      var rank = document.createElement("span");
+      rank.className = "rank"; rank.textContent = String(i+1);
+      var cb = document.createElement("input");
+      cb.type="checkbox"; cb.checked=!!t.done;
+      cb.setAttribute("aria-label",(i+1)+"번째 할 일 완료");
+      var inp = document.createElement("input");
+      inp.type="text"; inp.value=t.text||""; inp.placeholder="오늘 끝낼 일 "+(i+1);
+      inp.setAttribute("aria-label",(i+1)+"번째 할 일");
+      cb.addEventListener("change", function(){ t.done=cb.checked; row.classList.toggle("done",t.done); countTodos(); scheduleSave(); });
+      inp.addEventListener("input", function(){ t.text=inp.value; scheduleSave(); });
+      row.appendChild(rank); row.appendChild(cb); row.appendChild(inp);
+      box.appendChild(row);
+    })(i);
+  }
+  countTodos();
+}
+function countTodos(){
+  var n = day.todos.filter(function(t){ return t && t.done && t.text; }).length;
+  document.getElementById("todoMeta").textContent = n+"/3";
+}
+
+function renderChecklist(){
+  var box = document.getElementById("checklist");
+  box.textContent = "";
+  checklist.forEach(function(item){
+    var row = document.createElement("div");
+    row.className = "todo" + (item.done ? " done" : "");
+    var cb = document.createElement("input");
+    cb.type="checkbox"; cb.checked=!!item.done; cb.setAttribute("aria-label",item.text);
+    var inp = document.createElement("input");
+    inp.type="text"; inp.value=item.text; inp.readOnly=true; inp.setAttribute("aria-label",item.text);
+    cb.addEventListener("change", function(){ item.done=cb.checked; row.classList.toggle("done",item.done); scheduleSave(); });
+    row.appendChild(cb); row.appendChild(inp);
+    box.appendChild(row);
+  });
+}
+
+/* ===================== 챙길 것 ===================== */
+function renderCarry(){
+  var box = document.getElementById("carry");
+  box.textContent = "";
+  CARRY.forEach(function(name){
+    var b = document.createElement("button");
+    b.type="button"; b.className="chip"; b.textContent=name;
+    var on = day.carry.indexOf(name) >= 0;
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.addEventListener("click", function(){
+      var i = day.carry.indexOf(name);
+      if(i>=0) day.carry.splice(i,1); else day.carry.push(name);
+      b.setAttribute("aria-pressed", i>=0 ? "false" : "true");
+      scheduleSave();
+    });
+    box.appendChild(b);
+  });
+}
+
+/* ===================== 덕질 ===================== */
+function nextMatch(list){
+  for(var i=0;i<list.length;i++){
+    var m = list[i];
+    if(!m.d) continue;
+    if(ddayFrom(today, watchNight(m)) >= 0) return m;
+  }
+  return null;
+}
+function renderTeams(){
+  var box = document.getElementById("teams");
+  box.textContent = "";
+
+  var realNext = nextMatch(LIGA.concat(UCL).sort(function(a,b){ return a.d < b.d ? -1 : 1; }));
+  var realComp = realNext && UCL.indexOf(realNext)>=0 ? "UCL" : "라리가";
+  teamRow(box,"real","레알 마드리드", realNext, "real", realComp);
+  teamRow(box,"lg","LG 트윈스", nextMatch(KBO), "lg", "KBO");
+  teamRow(box,"t1","T1", nextMatch(LCK), "t1", "LCK");
+
+  var row = document.createElement("div");
+  row.className = "team";
+  row.innerHTML = '<span class="badge res">리센느</span>'+
+    '<span class="next" style="color:var(--ink-3);font-size:13px">라이브 예고가 없어 브리핑에서 제외 · 유튜브 알림으로</span>'+
+    '<span class="dday" style="visibility:hidden">—</span>';
+  box.appendChild(row);
+
+  document.getElementById("kboNote").textContent =
+    "LG는 우천취소·재편성이 잦아 아침에 KBO 공식 일정을 한 번 확인해야 합니다.";
+}
+function teamRow(box, key, name, m, cls, comp){
+  var row = document.createElement("div");
+  row.className = "team";
+
+  var badge = document.createElement("span");
+  badge.className = "badge "+cls; badge.textContent = name;
+
+  var next = document.createElement("span");
+  next.className = "next";
+  var dd = document.createElement("span");
+  dd.className = "dday";
+
+  if(m){
+    var night = watchNight(m);
+    var n = ddayFrom(today, night);
+    var dawn = isDawn(m.t);
+    dd.textContent = ddayLabel(n, dawn);
+    if(n<=1) dd.classList.add("soon");
+    var when = md(m.d)+"("+wdOf(m.d)+") "+(m.t || "시간 미정");
+    next.innerHTML = "<b>"+esc(m.opp)+"</b> "+
+      '<span class="when">'+esc(comp)+" · "+esc(when)+(m.ha?" · "+esc(m.ha):"")+(m.place?" "+esc(m.place):"")+"</span>"+
+      (dawn ? ' <span class="dawn">새벽</span>' : "")+
+      (m.tag ? '<span class="tagline">'+esc(m.tag)+"</span>" : "");
+  } else {
+    dd.textContent = "미정";
+    next.innerHTML = '<span class="when">다음 대진 미공개 · 소스에서 확인</span>';
+  }
+
+  var prev = document.createElement("div");
+  prev.className = "prev";
+  var lab = document.createElement("span"); lab.textContent = "어제";
+  var inp = document.createElement("input");
+  inp.type="text"; inp.value = day.results[key] || "";
+  inp.placeholder = "결과 적어두기";
+  inp.setAttribute("aria-label", name+" 어제 결과");
+  inp.addEventListener("input", function(){ day.results[key]=inp.value; scheduleSave(); });
+  prev.appendChild(lab); prev.appendChild(inp);
+
+  row.appendChild(badge); row.appendChild(next); row.appendChild(dd); row.appendChild(prev);
+  box.appendChild(row);
+}
+
+/* ===================== 어제 기록 ===================== */
+function seg(el, values, labels, cur, onPick){
+  el.textContent = "";
+  values.forEach(function(v,i){
+    var b = document.createElement("button");
+    b.type="button"; b.textContent = labels[i];
+    b.setAttribute("aria-pressed", cur===v ? "true" : "false");
+    b.addEventListener("click", function(){
+      onPick(cur===v ? null : v);
+      renderRec();
+      scheduleSave();
+    });
+    el.appendChild(b);
+  });
+}
+function renderRec(){
+  document.getElementById("recDate").textContent = md(ymd(addDays(today,-1)))+"("+WD[addDays(today,-1).getDay()]+")";
+  seg(document.getElementById("segSleep"), SLEEP, SLEEP.map(function(v){ return v+"h"; }), day.rec.sleep, function(v){ day.rec.sleep=v; });
+  seg(document.getElementById("segWorkout"), [true,false], ["했음","안 함"], day.rec.workout, function(v){ day.rec.workout=v; });
+  seg(document.getElementById("segCond"), [1,2,3], COND, day.rec.cond, function(v){ day.rec.cond=v; });
+
+  var p = document.getElementById("pace");
+  var s = day.rec.sleep;
+  if(s === null || s === undefined){
+    p.textContent = "수면 시간을 찍으면 오늘 페이스를 잡아드려요.";
+  } else if(s < 5.5){
+    p.textContent = "수면 "+s+"시간. 오늘은 할 일 3개 중 1개만 확실히 끝내고, 새벽 경기는 하이라이트로 넘기세요.";
+  } else if(s < 7){
+    p.textContent = "수면 "+s+"시간. 평소 페이스는 가능하지만 새벽 경기를 보면 내일이 무너집니다. 하나만 고르세요.";
+  } else {
+    p.textContent = "수면 "+s+"시간. 컨디션 여유 있음 — 미뤄둔 무거운 일을 오전에 붙이기 좋은 날입니다.";
+  }
+  if(day.rec.cond === 1) p.textContent += " 컨디션도 나쁘니 욕심은 접어두고요.";
+}
+
+function renderSpark(){
+  var svg = document.getElementById("spark");
+  var pts = [];
+  var byDate = {};
+  history.forEach(function(v){ if(v && v.date && v.rec && typeof v.rec.sleep === "number") byDate[v.date]=v.rec.sleep; });
+  if(day.rec.sleep !== null && day.rec.sleep !== undefined) byDate[todayKey] = day.rec.sleep;
+  for(var i=6;i>=0;i--){
+    var k = ymd(addDays(today,-i));
+    pts.push({k:k, v: byDate[k] !== undefined ? byDate[k] : null});
+  }
+  var cap = document.getElementById("sparkcap");
+  var have = pts.filter(function(p){ return p.v !== null; });
+  if(have.length < 2){
+    svg.innerHTML = "";
+    /* SVGElement에는 hidden 프로퍼티가 없어서 속성으로 직접 붙입니다 —
+       svg.hidden = true 는 조용히 무시되고 빈 그래프 자리만 남습니다 */
+    svg.setAttribute("hidden","");
+    cap.textContent = "이틀만 기록하면 여기에 수면 추이가 그려집니다";
+    return;
+  }
+  svg.removeAttribute("hidden");
+  var W=300,H=46,PAD=8, lo=3, hi=10;
+  function X(i){ return PAD + i*(W-PAD*2)/6; }
+  function Y(v){ return H-10 - (v-lo)/(hi-lo)*(H-20); }
+  var d="", area="", last=null, lastI=0;
+  pts.forEach(function(p,i){
+    if(p.v===null) return;
+    var x=X(i), y=Y(p.v);
+    d += (d===""?"M":"L")+x.toFixed(1)+" "+y.toFixed(1);
+    last=p.v; lastI=i;
+  });
+  var firstI = pts.findIndex(function(p){ return p.v!==null; });
+  area = d + "L"+X(lastI).toFixed(1)+" "+(H-4)+" L"+X(firstI).toFixed(1)+" "+(H-4)+" Z";
+  var g7 = Y(7);
+  svg.innerHTML =
+    '<line class="grid" x1="0" y1="'+g7.toFixed(1)+'" x2="'+W+'" y2="'+g7.toFixed(1)+'"></line>'+
+    '<path class="fill" d="'+area+'"></path>'+
+    '<path class="ln" d="'+d+'"></path>'+
+    '<circle class="end" cx="'+X(lastI).toFixed(1)+'" cy="'+Y(last).toFixed(1)+'" r="2.6"></circle>';
+  var lo7 = have.filter(function(p){ return p.v < 7; }).length;
+  cap.textContent = "";
+  var l = document.createElement("span");
+  l.textContent = "최근 7일 · 점선은 7시간";
+  var r = document.createElement("span");
+  r.textContent = "어제 "+last+"h · 7시간 미만 "+lo7+"일";
+  cap.appendChild(l); cap.appendChild(r);
+}
+
+/* ===================== 한 줄 문장 ===================== */
+function renderQuote(){
+  var q = document.getElementById("quote");
+  var idx = Math.floor(today.getTime()/86400000) % QUOTES.length;
+  q.value = day.quote || QUOTES[idx];
+  q.style.height = "auto";
+  q.style.height = q.scrollHeight+"px";
+}
+
+/* ===================== 전체 일정 ===================== */
+var TABS = [
+  {id:"liga", name:"라리가", rows:LIGA, note:"굵게 표시된 두 경기는 마드리드 더비(9/20)와 엘 클라시코(10/26). 9/20 더비는 밤 11시 15분으로 이 구간에서 유일하게 새벽이 아닙니다."},
+  {id:"ucl", name:"챔피언스리그", rows:UCL, note:"최근 결과: 9/9 인터 밀란전 2-1 승리 (홈)."},
+  {id:"kbo", name:"LG 트윈스", rows:KBO, note:"정규시즌 10월 7일 종료 예정. 우천취소 재편성이 섞여 있어 날짜가 비어 있는 경기는 당일 KBO 공식 일정에서 확인이 필요합니다."},
+  {id:"lck", name:"T1", rows:LCK, note:"이후 대진은 주 단위로 공개됩니다. 정확한 경기 시각은 LCK 공식 일정을 확인하세요."}
+];
+function renderTabs(){
+  var box = document.getElementById("tabs");
+  TABS.forEach(function(t,i){
+    var b = document.createElement("button");
+    b.type="button"; b.className="tab"; b.textContent=t.name;
+    b.setAttribute("aria-selected", i===0 ? "true" : "false");
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(box.children, function(c){ c.setAttribute("aria-selected","false"); });
+      b.setAttribute("aria-selected","true");
+      renderTable(t);
+    });
+    box.appendChild(b);
+  });
+  renderTable(TABS[0]);
+}
+function renderTable(t){
+  var tbl = document.getElementById("tbl");
+  var isKbo = t.id==="kbo", isLck = t.id==="lck";
+  var head = isKbo ? ["일정","상대","장소","홈/원정","D-day"]
+           : isLck ? ["날짜","상대","D-day"]
+           : ["날짜","시간","상대","홈/원정","D-day"];
+  tbl.tHead.innerHTML = "<tr>"+head.map(function(h){ return "<th>"+h+"</th>"; }).join("")+"</tr>";
+  var body = tbl.tBodies[0];
+  body.innerHTML = t.rows.map(function(m){
+    var n = m.d ? ddayFrom(today, watchNight(m)) : null;
+    var label = n===null ? "미정" : ddayLabel(n, isDawn(m.t));
+    var cls = m.tag ? "hl" : (n!==null && n<0 ? "past" : "");
+    var cells;
+    if(isKbo){
+      cells = ['<td class="mono">'+esc(m.span || (md(m.d)+"("+wdOf(m.d)+")"+(m.t?" "+m.t:"")))+"</td>",
+               '<td class="opp">'+esc(m.opp)+"</td>",
+               "<td>"+esc(m.place||"")+"</td>",
+               "<td>"+esc(m.ha||"")+"</td>",
+               '<td class="mono">'+label+"</td>"];
+    } else if(isLck){
+      cells = ['<td class="mono">'+md(m.d)+"("+wdOf(m.d)+")</td>",
+               '<td class="opp">'+esc(m.opp)+"</td>",
+               '<td class="mono">'+label+"</td>"];
+    } else {
+      cells = ['<td class="mono">'+md(m.d)+"("+wdOf(m.d)+")</td>",
+               '<td class="mono">'+esc(m.t)+(isDawn(m.t)?" 새벽":"")+"</td>",
+               '<td class="opp">'+esc(m.opp)+(m.tag?'<span class="tagline">'+esc(m.tag)+"</span>":"")+"</td>",
+               "<td>"+esc(m.ha)+"</td>",
+               '<td class="mono">'+label+"</td>"];
+    }
+    return "<tr"+(cls?' class="'+cls+'"':"")+">"+cells.join("")+"</tr>";
+  }).join("");
+  document.getElementById("tblNote").textContent = t.note;
+}
+
+/* ===================== 테마 ===================== */
+var THEMES = [["auto","자동"],["light","밝게"],["dark","어둡게"]];
+function curTheme(){ try{ return localStorage.getItem(LS+"theme") || "auto"; }catch(e){ return "auto"; } }
+function setTheme(v){
+  try{ localStorage.setItem(LS+"theme", v); }catch(e){}
+  if(v === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", v);
+  renderTheme();
+}
+function renderTheme(){
+  var cur = curTheme();
+  THEMES.forEach(function(t){
+    if(t[0] === cur) document.getElementById("themeBtn").textContent = t[1];
+  });
+}
+document.getElementById("themeBtn").addEventListener("click", function(){
+  var cur = curTheme(), i = 0;
+  THEMES.forEach(function(t,k){ if(t[0] === cur) i = k; });
+  setTheme(THEMES[(i+1) % THEMES.length][0]);
+});
+
+/* ===================== 부팅 ===================== */
+function renderAll(){
+  renderFirst(); renderTodos(); renderCarry(); renderTeams();
+  renderRec(); renderSpark(); renderQuote();
+}
+renderHeader();
+defaults();
+if(!loadLocal()) carryOver();
+renderAll();
+renderChecklist();
+renderTabs();
+renderTheme();
+tickClock();
+setInterval(tickClock, 20000);
+
+/* 탭을 닫거나 백그라운드로 보낼 때 대기 중인 저장을 흘려보냅니다 */
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState === "hidden") flushSave();
+  else tickClock();
+});
+
+document.getElementById("firstTime").addEventListener("input", function(e){ day.first.time=e.target.value; renderCountdown(); scheduleSave(); });
+document.getElementById("firstLabel").addEventListener("input", function(e){ day.first.label=e.target.value; renderCountdown(); scheduleSave(); });
+document.getElementById("quote").addEventListener("input", function(e){
+  day.quote = e.target.value;
+  e.target.style.height="auto"; e.target.style.height=e.target.scrollHeight+"px";
+  scheduleSave();
+});
+
+/*pwa:start*/
+/* 홈 화면 설치 — 브라우저가 조건을 만족했다고 알려줄 때만 버튼을 띄웁니다 */
+(function(){
+  var evt = null, btn = document.getElementById("installBtn");
+  if(!btn) return;
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault(); evt = e; btn.hidden = false;
+  });
+  btn.addEventListener("click", function(){
+    if(!evt) return;
+    evt.prompt();
+    evt.userChoice.then(function(){ evt = null; btn.hidden = true; });
+  });
+  window.addEventListener("appinstalled", function(){ evt = null; btn.hidden = true; });
+})();
+/*pwa:end*/
+
+connect();
+})();
+</script>
+
+</body>
+</html>
