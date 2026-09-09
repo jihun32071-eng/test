@@ -13,16 +13,28 @@ sh 실행.sh                       # → http://localhost:8000
 
 ## 휴대폰에 앱으로 넣기
 
-홈 화면 설치는 **https 주소**가 있어야 됩니다. 이 저장소에는 `morning-brief/` 를
-GitHub Pages 로 올리는 워크플로(`.github/workflows/pages.yml`)가 들어 있습니다.
+홈 화면 설치는 **https 주소**가 있어야 됩니다. 이 저장소는 GitHub Pages 가 이미
+켜져 있고 **기본 브랜치 루트**를 서비스하므로, `morning-brief/` 가 기본 브랜치에
+들어가면 바로 앱 주소가 생깁니다.
 
-1. 저장소 **Settings → Pages → Source** 를 `GitHub Actions` 로 바꿉니다 (한 번만)
-2. 워크플로가 돌고 나면 `https://<사용자>.github.io/test/` 가 앱 주소가 됩니다
-3. **안드로이드·데스크톱 크롬** — 주소창의 설치 아이콘, 또는 앱 헤더의 "설치" 버튼
-   **iOS 사파리** — 공유 → 홈 화면에 추가 (`beforeinstallprompt` 가 없어 버튼은 안 뜹니다)
+    https://jihun32071-eng.github.io/test/morning-brief/
+
+기본 브랜치로 병합하는 것 외에 따로 할 설정은 없습니다.
+
+> Actions 로 배포하는 워크플로를 두는 방법도 있지만, `github-pages` 환경은
+> 기본적으로 **기본 브랜치에서만** 배포를 허용합니다. 기능 브랜치에서 돌리면
+> 로그도 남기지 못하고 몇 초 만에 실패합니다 — 그래서 그 워크플로는 뺐습니다.
+
+설치 방법:
+
+- **안드로이드·데스크톱 크롬** — 주소창의 설치 아이콘, 또는 앱 헤더의 "설치" 버튼
+- **iOS 사파리** — 공유 → 홈 화면에 추가 (`beforeinstallprompt` 가 없어 버튼은 안 뜹니다)
 
 설치하면 주소창 없이 뜨고, 비행기 모드에서도 열립니다. 기록은 그 기기의
 `localStorage` 에 남습니다.
+
+저장소 루트의 `.nojekyll` 은 Pages 가 파일을 Jekyll 로 가공하지 않고 그대로
+내보내게 합니다.
 
 ## 파일
 
