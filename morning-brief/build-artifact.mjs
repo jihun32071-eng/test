@@ -13,6 +13,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stripPwa, assertStripped } from "./strip-pwa.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const src = readFileSync(join(here, "index.html"), "utf8");
@@ -30,20 +31,14 @@ const body  = pick(/<body>[\s\S]*<\/body>/, "<body>")
   .replace(/^<body>\n?/, "")
   .replace(/\n?<\/body>$/, "");
 
-const strip = (s) => s
-  .replace(/[ \t]*<!--pwa:start-->[\s\S]*?<!--pwa:end-->\n?/g, "")
-  .replace(/[ \t]*\/\*pwa:start\*\/[\s\S]*?\/\*pwa:end\*\/\n?/g, "");
-
-const out = [
+const out = assertStripped([
   "<!-- index.html에서 생성됨 — 직접 고치지 말고 build-artifact.mjs를 다시 돌리세요 -->",
   ...fonts,
   title,
-  strip(style),
+  stripPwa(style),
   "",
-  strip(body)
-].join("\n") + "\n";
-
-if (/<!--pwa:|\/\*pwa:/.test(out)) throw new Error("PWA 마커가 남았습니다 — 짝이 맞는지 확인하세요");
+  stripPwa(body)
+].join("\n") + "\n");
 
 mkdirSync(join(here, "dist"), { recursive: true });
 writeFileSync(join(here, "dist", "artifact.html"), out);
