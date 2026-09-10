@@ -12,8 +12,13 @@ name: API 챗봇 APK
 
 on:
   push:
+    # 앱 소스가 바뀔 때만 돕니다. README·설치 페이지만 고치면 다시 빌드하지 않아요.
     paths:
-      - 'api-chatbot/**'
+      - 'api-chatbot/app/**'
+      - 'api-chatbot/gradle/**'
+      - 'api-chatbot/gradlew*'
+      - 'api-chatbot/*.gradle.kts'
+      - 'api-chatbot/gradle.properties'
       - '.github/workflows/api-chatbot-apk.yml'
   workflow_dispatch:
 
