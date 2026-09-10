@@ -1,0 +1,7 @@
+# 이 파일을 복사해서 이름을 local.properties 로 바꾸고, 아래 값을 채워 주세요.
+# local.properties 는 .gitignore 에 들어 있어서 깃에 올라가지 않습니다.
+#
+# sdk.dir 은 Android Studio 가 프로젝트를 열 때 알아서 채워 줍니다.
+# 직접 쓴다면 예: sdk.dir=/Users/내이름/Library/Android/sdk
+
+ANTHROPIC_API_KEY=sk-ant-여기에-발급받은-키를-붙여넣으세요

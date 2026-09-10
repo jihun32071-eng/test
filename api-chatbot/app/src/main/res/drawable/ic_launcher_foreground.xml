@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 말풍선 모양 아이콘 -->
+    <path
+        android:fillColor="#FDFDFD"
+        android:pathData="M34,32h40a8,8 0 0 1 8,8v22a8,8 0 0 1 -8,8h-19l-13,11v-11h-8a8,8 0 0 1 -8,-8v-22a8,8 0 0 1 8,-8z" />
+    <path
+        android:fillColor="#1D6B67"
+        android:pathData="M45,48m-4,0a4,4 0 1,0 8,0a4,4 0 1,0 -8,0" />
+    <path
+        android:fillColor="#1D6B67"
+        android:pathData="M58,48m-4,0a4,4 0 1,0 8,0a4,4 0 1,0 -8,0" />
+    <path
+        android:fillColor="#1D6B67"
+        android:pathData="M71,48m-4,0a4,4 0 1,0 8,0a4,4 0 1,0 -8,0" />
+</vector>
