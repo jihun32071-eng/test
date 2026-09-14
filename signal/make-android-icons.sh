@@ -27,6 +27,8 @@ render() {
     square) BG='<rect width="512" height="512" rx="114" fill="#0C2B25"/>'; SCALE=1 ;;
     round)  BG='<circle cx="256" cy="256" r="256" fill="#0C2B25"/>';       SCALE=0.82 ;;
     fore)   BG='';                                                        SCALE=0.62 ;;
+    full)   BG='<rect width="512" height="512" fill="#0C2B25"/>';         SCALE=1    ;;
+    mask)   BG='<rect width="512" height="512" fill="#0C2B25"/>';         SCALE=0.62 ;;
     splash) BG='<rect width="512" height="512" fill="#E7ECEA"/>';         SCALE=0   ;;
   esac
   if [ "$SCALE" = "0" ]; then ART_G=''; else ART_G="<g transform=\"translate(256 256) scale($SCALE) translate(-256 -256)\">$ART</g>"; fi
@@ -58,3 +60,11 @@ done
 render square 512 "$OUT/ic_launcher-playstore.png"   # 플레이스토어·설정 화면용
 render splash 96  "$OUT/splash.png"                  # 실행 화면 (단색)
 echo "완료 → $OUT"
+
+# 웹용 — 설치 페이지의 아이콘과, 아이폰에서 "홈 화면에 추가" 했을 때 쓰는 그림.
+# maskable 은 안드로이드 크롬이 원형·물방울 등으로 잘라내므로 여백을 넉넉히 둡니다.
+render square 180 "$DIR/icon-180.png"
+render square 192 "$DIR/icon-192.png"
+render square 512 "$DIR/icon-512.png"
+render mask   512 "$DIR/icon-maskable-512.png"
+echo "완료 → $DIR (웹 아이콘)"

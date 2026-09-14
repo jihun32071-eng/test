@@ -4,13 +4,20 @@
 
 ## 받기
 
-**[signal-receiver.apk 받기](../../releases/download/signal/signal-receiver.apk)**
+폰 브라우저에서 **https://jihun32071-eng.github.io/test/signal/install.html** 을 열면
+받는 버튼이 나옵니다. 사이트 대문(`https://jihun32071-eng.github.io/test/`)에서도 갈 수 있습니다.
 
-폰 브라우저에서 위 링크를 눌러 받은 뒤 설치하세요. 설치하려면 폰 설정에서
-"출처를 알 수 없는 앱 설치"를 한 번 허용해야 합니다. 서명이 없는 디버그
-빌드라 플레이스토어 앱과는 별개로 깔립니다.
-
+GitHub 에서 직접 받으려면 **[signal-receiver.apk](../../releases/download/signal/signal-receiver.apk)**.
 `signal` 태그는 항상 최신 빌드를 가리킵니다.
+
+설치하려면 폰 설정에서 "출처를 알 수 없는 앱 설치"를 한 번 허용해야 합니다.
+서명이 없는 디버그 빌드라 플레이스토어 앱과는 별개로 깔립니다.
+
+안드로이드가 아니면 APK 는 쓸 수 없습니다. 대신 `signal/index.html` 을 열어
+홈 화면에 추가하면 앱처럼 씁니다 — 기능은 똑같습니다.
+
+> Pages 는 기본 브랜치(`claude/recommendation-3q8oq6`)에서 서비스됩니다.
+> 이 파일들이 거기 들어가야 위 주소가 살아납니다.
 
 ## 앱에서 하는 일
 
@@ -33,9 +40,13 @@
 
 ```
 signal/index.html          앱 코드 전부 (바깥 요청 0 — 웹폰트도 서비스워커도 없음)
-signal/icon.svg            런처 아이콘 원본
-signal/make-android-icons.sh   icon.svg → app-signal/android-res/ PNG 생성
+signal/install.html        사이트에서 APK 를 받는 페이지
+signal/app.webmanifest     홈 화면에 추가했을 때 이름·아이콘 (서비스워커는 없음)
+signal/icon.svg            아이콘 원본
+signal/icon-*.png          웹·홈화면용 아이콘 (make-android-icons.sh 가 생성)
+signal/make-android-icons.sh   icon.svg → 런처 아이콘 + 웹 아이콘 생성
 app-signal/                Capacitor 껍데기 (package.json, capacitor.config.json, android-res/)
+index.html                 사이트 대문 (앱 목록)
 .github/workflows/signal-apk.yml   푸시하면 APK 빌드 → 릴리스 업로드
 ```
 
@@ -54,7 +65,7 @@ npm run build:apk
 ```
 
 아이콘을 바꿨다면 `sh signal/make-android-icons.sh` 로 PNG 를 다시 만들고 커밋하세요
-(CI 에는 크로뮴이 없습니다).
+(CI 에는 크로뮴이 없습니다). 런처 아이콘과 웹 아이콘이 한 번에 나옵니다.
 
 브라우저에서 그냥 보려면 `signal/index.html` 을 열면 됩니다. 진동과 뒤로가기
 처리만 빠지고 나머지는 똑같이 동작합니다.

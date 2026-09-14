@@ -6,7 +6,7 @@
  * 서비스워커도 없습니다 — APK 안에서 손볼 것이 없습니다. 비행기 모드에서도
  * 첫 실행부터 그대로 뜹니다.
  */
-import { readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { copyFileSync, readFileSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -25,4 +25,11 @@ if (remote) {
 rmSync(www, { recursive: true, force: true });
 mkdirSync(www, { recursive: true });
 writeFileSync(join(www, "index.html"), html);
-console.log(`www/index.html — ${html.length.toLocaleString()} bytes`);
+
+// manifest 와 아이콘은 웹에서 "홈 화면에 추가" 하는 사람들을 위한 것이라
+// APK 안에서는 쓸 일이 없습니다. 그래도 같이 넣습니다 — 몇 KB 이고,
+// 빼면 index.html 이 없는 파일을 가리키게 됩니다.
+const extras = ["app.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
+for (const name of extras) copyFileSync(join(app, "..", "signal", name), join(www, name));
+
+console.log(`www/index.html — ${html.length.toLocaleString()} bytes (+ ${extras.length}개 자산)`);
