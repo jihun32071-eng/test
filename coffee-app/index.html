@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>커피 브루잉 앱</title>
+  <meta name="description" content="커피 필드 매뉴얼을 기반으로 만든 추출 레시피 계산기 · 브루잉 타이머 · 카페인 트래커 · 원두 신선도 관리 · 커핑 노트 앱">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" href="assets/icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/icon-192.png" sizes="192x192">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#efeee5" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#15120e" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="커피 브루잉">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="appbar">
+    <div class="appbar-top">
+      <div class="brand">
+        <strong>커피 브루잉 앱</strong>
+        <span>COFFEE FIELD MANUAL · APP</span>
+      </div>
+      <div class="row" style="gap:8px;">
+        <button type="button" class="icon-btn" id="install-btn" hidden>홈 화면에 추가</button>
+        <button type="button" class="icon-btn" id="theme-toggle" aria-live="polite">테마</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="화면 선택">
+      <button type="button" class="tab" role="tab" id="tab-brew" aria-controls="view-brew" data-view="brew">추출 레시피</button>
+      <button type="button" class="tab" role="tab" id="tab-caffeine" aria-controls="view-caffeine" data-view="caffeine">카페인</button>
+      <button type="button" class="tab" role="tab" id="tab-beans" aria-controls="view-beans" data-view="beans">원두 선반</button>
+      <button type="button" class="tab" role="tab" id="tab-cupping" aria-controls="view-cupping" data-view="cupping">커핑 노트</button>
+      <button type="button" class="tab" role="tab" id="tab-guide" aria-controls="view-guide" data-view="guide">가이드</button>
+    </nav>
+  </header>
+
+  <main class="app">
+    <!-- ===== 추출 레시피 ===== -->
+    <section class="view" id="view-brew" role="tabpanel" aria-labelledby="tab-brew" tabindex="-1">
+      <div class="view-head">
+        <div class="eyebrow">Brew · Chapter 06–08</div>
+        <h2>추출 레시피 계산기</h2>
+        <p>추출 방식과 원두 양을 정하면 물 양·온도·분쇄도·푸어 스케줄을 계산합니다. 타이머는 단계에 맞춰 지금 부어야 할 물의 양을 알려줍니다.</p>
+      </div>
+
+      <div class="panel">
+        <h3>추출 방식</h3>
+        <div class="chip-row" id="method-chips" role="group" aria-label="추출 방식"></div>
+
+        <div class="grid grid-3" style="margin-top:18px;">
+          <label class="field">원두 (g)
+            <input type="number" id="dose" min="5" max="200" step="0.5" value="20" inputmode="decimal">
+          </label>
+          <label class="field"><span>비율 <b class="mono" id="ratio-view">1 : 16</b></span>
+            <input type="range" id="ratio" min="1" max="20" step="0.5" value="16" aria-label="원두 대 물 비율">
+          </label>
+          <label class="field" id="strength-wrap">잔 수 기준 역계산
+            <select id="cups">
+              <option value="">원두 양으로 계산</option>
+              <option value="1">1잔 (240ml)</option>
+              <option value="2">2잔 (480ml)</option>
+              <option value="3">3잔 (720ml)</option>
+            </select>
+          </label>
+        </div>
+        <p class="hint" id="method-note"></p>
+      </div>
+
+      <div class="panel">
+        <h3>레시피</h3>
+        <div class="recipe-figures" id="figures"></div>
+        <div class="scale">
+          <div class="scale-track" id="grind-track" style="background:linear-gradient(to right,var(--roast-4),var(--roast-1));"></div>
+          <div class="scale-labels"><span>곱게 (설탕가루)</span><span>굵게 (거친 소금)</span></div>
+        </div>
+      </div>
+
+      <div class="panel" id="timer-panel">
+        <h3>브루잉 타이머</h3>
+        <div class="timer">
+          <div>
+            <div class="timer-clock"><span id="clock">0:00</span><small id="clock-total"></small></div>
+          </div>
+          <div class="row">
+            <button type="button" class="btn" id="timer-toggle">시작</button>
+            <button type="button" class="btn ghost small" id="timer-reset">리셋</button>
+          </div>
+        </div>
+        <div class="timer-bar"><div id="timer-progress"></div></div>
+        <ol class="steps" id="steps"></ol>
+        <p class="hint" id="timer-status" role="status" aria-live="polite"></p>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" class="btn ghost small" id="log-brew">이 레시피로 카페인 기록하기</button>
+        </div>
+      </div>
+
+      <div class="panel" id="steep-panel" hidden>
+        <h3>침출 타이머</h3>
+        <p class="hint">냉장고에 넣은 시각을 기록하면 완료 시각을 계산합니다.</p>
+        <div class="row" style="margin-top:12px;">
+          <div class="chip-row" id="steep-hours" role="group" aria-label="침출 시간"></div>
+        </div>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" class="btn" id="steep-start">지금 담그기</button>
+          <button type="button" class="btn ghost small" id="steep-clear">기록 지우기</button>
+        </div>
+        <p class="hint" id="steep-status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- ===== 카페인 ===== -->
+    <section class="view" id="view-caffeine" role="tabpanel" aria-labelledby="tab-caffeine" tabindex="-1" hidden>
+      <div class="view-head">
+        <div class="eyebrow">Caffeine · Chapter 11</div>
+        <h2>카페인 트래커</h2>
+        <p>마신 음료를 기록하면 성인 1일 권장 한도 400mg 대비 섭취량을 보여줍니다. 함량은 추정치이며 원두·추출 방식에 따라 편차가 있습니다.</p>
+      </div>
+
+      <div class="panel">
+        <div class="spread">
+          <h3 style="margin:0;">오늘 섭취량</h3>
+          <span class="mono" id="today-label"></span>
+        </div>
+        <div class="gauge">
+          <div class="gauge-track"><div class="gauge-fill" id="caff-fill"></div></div>
+          <div class="gauge-scale"><span>0mg</span><span>200mg</span><span>400mg 한도</span></div>
+        </div>
+        <p class="hint" id="caff-summary" role="status" aria-live="polite"></p>
+        <ul class="list" id="caff-list"></ul>
+      </div>
+
+      <div class="panel">
+        <h3>음료 추가</h3>
+        <div class="chip-row" id="drink-chips" role="group" aria-label="음료 선택" style="margin-top:12px;"></div>
+        <div class="grid grid-3" style="margin-top:16px;">
+          <label class="field">샷 수
+            <input type="number" id="drink-shots" min="0" max="6" step="1" value="1" inputmode="numeric">
+          </label>
+          <label class="field">원두 품종
+            <select id="drink-bean"></select>
+          </label>
+          <label class="field">잔 수
+            <input type="number" id="drink-count" min="1" max="10" step="1" value="1" inputmode="numeric">
+          </label>
+        </div>
+        <div class="spread" style="margin-top:16px;">
+          <div><span class="mono" id="drink-estimate"></span></div>
+          <button type="button" class="btn" id="drink-add">기록 추가</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>최근 7일</h3>
+        <div class="week" id="week-chart"></div>
+      </div>
+    </section>
+
+    <!-- ===== 원두 선반 ===== -->
+    <section class="view" id="view-beans" role="tabpanel" aria-labelledby="tab-beans" tabindex="-1" hidden>
+      <div class="view-head">
+        <div class="eyebrow">Beans · Chapter 03–05, 09</div>
+        <h2>원두 선반</h2>
+        <p>로스팅 날짜를 기준으로 디게싱(2~14일)과 권장 소비 기한(2~4주)을 계산합니다.</p>
+      </div>
+
+      <div class="panel">
+        <h3>원두 등록</h3>
+        <div class="grid grid-2" style="margin-top:12px;">
+          <label class="field">이름
+            <input type="text" id="bean-name" placeholder="예: 에티오피아 예가체프 G1" maxlength="60">
+          </label>
+          <label class="field">산지
+            <select id="bean-origin"></select>
+          </label>
+          <label class="field">로스팅 단계
+            <select id="bean-roast"></select>
+          </label>
+          <label class="field">가공 방식
+            <select id="bean-process"></select>
+          </label>
+          <label class="field">로스팅 날짜
+            <input type="date" id="bean-date">
+          </label>
+          <label class="field">중량 (g)
+            <input type="number" id="bean-weight" min="0" max="5000" step="10" value="200" inputmode="numeric">
+          </label>
+        </div>
+        <div class="row" style="margin-top:16px;">
+          <button type="button" class="btn" id="bean-add">선반에 추가</button>
+        </div>
+      </div>
+
+      <div class="grid grid-2" id="bean-list"></div>
+    </section>
+
+    <!-- ===== 커핑 노트 ===== -->
+    <section class="view" id="view-cupping" role="tabpanel" aria-labelledby="tab-cupping" tabindex="-1" hidden>
+      <div class="view-head">
+        <div class="eyebrow">Cupping · Chapter 10, 13</div>
+        <h2>커핑 노트</h2>
+        <p>5개 항목을 6.00~10.00점으로 평가하면 100점 환산 점수를 계산합니다. 80점 이상이 SCA 스페셜티 기준입니다.</p>
+      </div>
+
+      <div class="panel">
+        <h3>새 노트</h3>
+        <div class="grid grid-2" style="margin-top:12px;">
+          <label class="field">원두
+            <select id="cup-bean"></select>
+          </label>
+          <label class="field">추출 방식
+            <select id="cup-method"></select>
+          </label>
+        </div>
+        <div id="cup-attrs" style="margin-top:20px;"></div>
+        <div class="spread">
+          <div>
+            <div class="score-big" id="cup-score">40.00</div>
+            <span class="hint" id="cup-verdict"></span>
+          </div>
+          <button type="button" class="btn ghost small" id="cup-reset">점수 초기화</button>
+        </div>
+        <p class="hint" style="margin-top:18px;">향미 태그</p>
+        <div class="chip-row" id="cup-tags" role="group" aria-label="향미 태그"></div>
+        <label class="field" style="margin-top:16px;">메모
+          <textarea id="cup-memo" placeholder="추출 조건, 인상, 다음에 바꿔볼 변수" maxlength="500"></textarea>
+        </label>
+        <div class="row" style="margin-top:14px;">
+          <button type="button" class="btn" id="cup-save">노트 저장</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>저장된 노트</h3>
+        <ul class="list" id="cup-list"></ul>
+      </div>
+    </section>
+
+    <!-- ===== 가이드 ===== -->
+    <section class="view" id="view-guide" role="tabpanel" aria-labelledby="tab-guide" tabindex="-1" hidden>
+      <div class="view-head">
+        <div class="eyebrow">Reference · 14 Chapters</div>
+        <h2>빠른 참조</h2>
+        <p>커피 필드 매뉴얼에서 추출할 때 가장 자주 확인하게 되는 표만 모았습니다.</p>
+      </div>
+
+      <div class="panel">
+        <h3>방식별 기준값</h3>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table>
+            <thead><tr><th>방식</th><th class="mono">비율</th><th class="mono">온도</th><th>분쇄도</th><th class="mono">시간</th></tr></thead>
+            <tbody id="guide-methods"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>로스팅 단계</h3>
+        <div class="roast-row">
+          <div class="roast-swatch"><b>라이트</b>산미 최대</div>
+          <div class="roast-swatch"><b>미디엄</b>산미·단맛 균형</div>
+          <div class="roast-swatch"><b>미디엄다크</b>카라멜·초콜릿</div>
+          <div class="roast-swatch"><b>다크</b>쓴맛·바디 강조</div>
+        </div>
+        <p class="hint">로스팅 후 원두는 2~14일 숙성(디게싱)을 거쳐야 이산화탄소가 빠지며 맛이 안정됩니다.</p>
+      </div>
+
+      <div class="panel">
+        <h3>음료 구성 비율</h3>
+        <p class="hint" style="margin-bottom:14px;">구성 비율은 상대적인 이해를 돕기 위한 개략적 표현입니다.</p>
+        <div id="guide-drinks"></div>
+      </div>
+
+      <div class="panel">
+        <h3>과다추출 · 과소추출 진단</h3>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table>
+            <thead><tr><th>증상</th><th>원인</th><th>조치</th></tr></thead>
+            <tbody>
+              <tr><td>쓰고 떫으며 텁텁함</td><td>과다추출 — 분쇄가 너무 곱거나 시간이 김</td><td>분쇄도를 굵게, 추출 시간 단축, 물 온도 1~2도 낮추기</td></tr>
+              <tr><td>밍밍하고 날카로운 신맛</td><td>과소추출 — 분쇄가 너무 굵거나 시간이 짧음</td><td>분쇄도를 곱게, 추출 시간 연장, 물 온도 올리기</td></tr>
+              <tr><td>향이 약하고 종이맛</td><td>원두 산화 또는 필터 린싱 부족</td><td>2~4주 이내 원두 사용, 필터를 뜨거운 물로 미리 헹구기</td></tr>
+              <tr><td>가스가 많고 맛이 들쭉날쭉</td><td>디게싱 부족 (로스팅 2일 이내)</td><td>2~14일 숙성 후 사용</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>보관 원칙</h3>
+        <div class="chip-row">
+          <span class="chip on">밀폐</span><span class="chip on">차광</span><span class="chip on">건조</span>
+        </div>
+        <p class="hint">상온의 밀폐 용기에 보관하고 2~4주 이내 소비. 냉동은 장기 보관 시에만, 해동 후 재냉동은 피합니다. 분쇄된 원두는 산화가 훨씬 빠릅니다.</p>
+      </div>
+
+      <div class="panel" id="install-panel">
+        <h3>폰에 설치하기</h3>
+        <p class="hint">홈 화면에 추가하면 주소창 없이 앱처럼 열리고, 오프라인에서도 동작합니다.</p>
+        <div class="grid grid-2" style="margin-top:14px;">
+          <div>
+            <span class="tag">iPhone · Safari</span>
+            <p class="hint">공유 버튼(□↑) → <b>홈 화면에 추가</b> → 추가</p>
+          </div>
+          <div>
+            <span class="tag">Android · Chrome</span>
+            <p class="hint">우측 상단 ⋮ → <b>앱 설치</b> 또는 홈 화면에 추가</p>
+          </div>
+        </div>
+        <p class="hint" id="install-state" style="margin-top:14px;"></p>
+      </div>
+
+      <footer>
+        <blockquote>이 앱의 수치는 커피 필드 매뉴얼의 일반적인 기준값입니다. 원두·장비·취향에 맞춰 조정해 쓰세요.</blockquote>
+        <p style="margin-top:16px;">기록은 브라우저에만 저장되며 외부로 전송되지 않습니다.</p>
+      </footer>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/store.js"></script>
+  <script src="assets/js/brew.js"></script>
+  <script src="assets/js/caffeine.js"></script>
+  <script src="assets/js/beans.js"></script>
+  <script src="assets/js/cupping.js"></script>
+  <script src="assets/js/guide.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    /* 오프라인 지원. file://에서는 서비스 워커를 쓸 수 없어 건너뜁니다. */
+    if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function () { /* 설치 실패해도 앱은 그대로 동작합니다. */ });
+      });
+    }
+  </script>
+</body>
+</html>
