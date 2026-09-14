@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>앱</title>
+<meta name="description" content="여기서 만든 앱들 — 폰에 넣거나 브라우저에서 바로 쓰세요.">
+<meta name="theme-color" content="#EDEFF2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101316" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  --ground:#EDEFF2; --surface:#FFFFFF; --surface-2:#F4F6F8;
+  --ink:#161A1D; --ink-2:#454C52; --muted:#6E777E;
+  --line:#DCE0E5; --line-strong:#BAC1C8;
+  --shadow:0 1px 2px rgba(22,26,29,.05), 0 8px 24px -16px rgba(22,26,29,.28);
+  --serif:"Gowun Batang","Nanum Myeongjo","Apple SD Gothic Neo",serif;
+  --sans:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"Roboto Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --ground:#101316; --surface:#181C20; --surface-2:#1F242A;
+    --ink:#E8EBEE; --ink-2:#B6BDC4; --muted:#848D95;
+    --line:#282E34; --line-strong:#3A424A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 26px -18px rgba(0,0,0,.9);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  max-width:520px;margin:0 auto;
+  padding:calc(48px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right))
+          calc(56px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  display:flex;flex-direction:column;gap:14px;
+}
+.eyebrow{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;
+  color:var(--muted);text-transform:uppercase;margin:0 0 4px;
+}
+h1{
+  font-family:var(--serif);font-weight:700;font-size:30px;margin:0 0 6px;
+  letter-spacing:-.01em;line-height:1.15;
+}
+.lede{margin:0 0 14px;color:var(--ink-2);font-size:14.5px}
+
+.app{
+  display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:16px;box-shadow:var(--shadow);
+  transition:border-color .18s ease, transform .18s ease;
+}
+.app:hover{border-color:var(--line-strong);transform:translateY(-1px)}
+.app img{width:52px;height:52px;flex:none;border-radius:12px}
+.app .t{flex:1 1 auto;min-width:0}
+.app h2{font-family:var(--serif);font-size:18px;font-weight:700;margin:0 0 2px;letter-spacing:-.01em}
+.app p{margin:0;font-size:13px;color:var(--muted)}
+.app .go{flex:none;color:var(--muted);font-size:18px;line-height:1}
+
+footer{
+  border-top:1px solid var(--line);padding-top:14px;margin-top:8px;
+  font-size:12.5px;color:var(--muted);
+}
+footer a{color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+:focus-visible{outline:2px solid var(--ink-2);outline-offset:2px;border-radius:6px}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div>
+    <p class="eyebrow">Apps</p>
+    <h1>여기서 만든 것들</h1>
+    <p class="lede">눌러서 폰에 넣거나, 설치하지 않고 브라우저에서 바로 쓰세요.</p>
+  </div>
+
+  <a class="app" href="signal/install.html">
+    <img src="signal/icon-192.png" alt="" width="52" height="52">
+    <span class="t">
+      <h2>시그널 수신기</h2>
+      <p>호감 신호 체크리스트 · 안드로이드 앱</p>
+    </span>
+    <span class="go" aria-hidden="true">→</span>
+  </a>
+
+  <a class="app" href="morning-brief/install.html">
+    <img src="morning-brief/icon-192.png" alt="" width="52" height="52">
+    <span class="t">
+      <h2>아침 브리핑</h2>
+      <p>하루를 여는 한 장 · 안드로이드 앱</p>
+    </span>
+    <span class="go" aria-hidden="true">→</span>
+  </a>
+
+  <footer>
+    전부 기기 안에만 저장됩니다 — 계정도 서버도 없습니다.
+    소스는 <a href="https://github.com/jihun32071-eng/test">GitHub</a> 에 있습니다.
+  </footer>
+
+</div>
+
+</body>
+</html>
