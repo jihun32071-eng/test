@@ -1,0 +1,9 @@
+{
+  "appId": "com.jihun.signalreceiver",
+  "appName": "시그널 수신기",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#E7ECEA",
+    "adjustMarginsForEdgeToEdge": "auto"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "signal-receiver",
+  "version": "1.0.0",
+  "private": true,
+  "description": "시그널 수신기 — 안드로이드 앱 껍데기 (Capacitor)",
+  "scripts": {
+    "sync:web": "node scripts/sync-web.mjs",
+    "add:android": "cap add android",
+    "icons": "cp -R android-res/mipmap-mdpi android-res/mipmap-hdpi android-res/mipmap-xhdpi android-res/mipmap-xxhdpi android-res/mipmap-xxxhdpi android-res/mipmap-anydpi-v26 android-res/values android/app/src/main/res/",
+    "build:apk": "npm run sync:web && npm run add:android && npm run icons && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/app": "^7.1.0",
+    "@capacitor/cli": "^7.6.9",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/haptics": "^7.0.2"
+  }
+}

@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="호감 신호를 체크하면 수신 강도가 나오는 체크리스트. 대상별로 따로 기록하고 변화를 남깁니다.">
+<meta name="theme-color" content="#E7ECEA">
+<title>시그널 수신기</title>
+
+<style>
+  :root{
+    --ground:#E7ECEA;
+    --surface:#FAFCFB;
+    --surface-2:#F0F4F2;
+    --ink:#13201D;
+    --ink-2:#3D4E4A;
+    --muted:#64756F;
+    --line:#CBD6D2;
+    --line-strong:#A9B9B3;
+    --accent:#0C7A64;
+    --accent-soft:#D3EBE3;
+    --hot:#C4443A;
+    --hot-soft:#F6DEDA;
+    --shadow:0 1px 0 rgba(19,32,29,.05);
+    --shadow-lift:0 6px 24px rgba(19,32,29,.13);
+    --serif:"Gowun Batang","Nanum Myeongjo","Apple SD Gothic Neo",serif;
+    --sans:"Pretendard","Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"Roboto Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0D1514; --surface:#161F1D; --surface-2:#1C2624;
+      --ink:#E7EEEB; --ink-2:#BECAC6; --muted:#8D9D98;
+      --line:#26332F; --line-strong:#3A4A45;
+      --accent:#3FD6B0; --accent-soft:#16332C;
+      --hot:#FF7A6B; --hot-soft:#33201D;
+      --shadow:0 1px 0 rgba(0,0,0,.35);
+      --shadow-lift:0 6px 24px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0D1514; --surface:#161F1D; --surface-2:#1C2624;
+    --ink:#E7EEEB; --ink-2:#BECAC6; --muted:#8D9D98;
+    --line:#26332F; --line-strong:#3A4A45;
+    --accent:#3FD6B0; --accent-soft:#16332C;
+    --hot:#FF7A6B; --hot-soft:#33201D;
+    --shadow:0 1px 0 rgba(0,0,0,.35);
+    --shadow-lift:0 6px 24px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  html{color-scheme:light dark;}
+  :root[data-theme="light"]{color-scheme:light;}
+  :root[data-theme="dark"]{color-scheme:dark;}
+
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:contain;
+  }
+  img{max-width:100%;}
+  [hidden]{display:none!important;}
+  button{font-family:inherit;}
+
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding-inline:20px;
+    padding-block:0 calc(64px + env(safe-area-inset-bottom));
+  }
+
+  /* ---------- 상단 고정 영역 ---------- */
+  .dock{
+    position:sticky;
+    top:0;
+    z-index:30;
+    background:var(--ground);
+    padding-top:env(safe-area-inset-top);
+  }
+  .dock::after{
+    content:"";
+    display:block;
+    height:14px;
+    background:linear-gradient(var(--ground),transparent);
+  }
+  .dock-inner{max-width:720px;margin:0 auto;padding:10px 20px 0;}
+
+  .barrow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .chips{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    flex:1 1 auto;
+    scrollbar-width:none;
+    padding-bottom:2px;
+  }
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{
+    flex:0 0 auto;
+    font-size:13px;
+    line-height:1;
+    padding:8px 12px;
+    border:1px solid var(--line-strong);
+    background:var(--surface);
+    color:var(--ink-2);
+    border-radius:999px;
+    cursor:pointer;
+    white-space:nowrap;
+    max-width:11em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    transition:background .18s,border-color .18s,color .18s;
+  }
+  /* 선택된 칩·주요 버튼의 글자색은 배경색 토큰을 씁니다 —
+     라이트에서는 밝은 글자 / 진한 초록, 다크에서는 진한 글자 / 민트로 자동으로 뒤집힙니다. */
+  .chip[aria-pressed="true"]{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--ground);
+    font-weight:600;
+  }
+  .chip-add{
+    flex:0 0 auto;
+    width:32px;height:32px;
+    border-radius:999px;
+    border:1px dashed var(--line-strong);
+    background:none;
+    color:var(--muted);
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+  }
+  .icon-btn{
+    flex:0 0 auto;
+    width:34px;height:34px;
+    border-radius:999px;
+    border:1px solid var(--line-strong);
+    background:var(--surface);
+    color:var(--ink-2);
+    font-size:15px;
+    line-height:1;
+    cursor:pointer;
+    display:grid;
+    place-items:center;
+  }
+  .icon-btn:active{background:var(--surface-2);}
+
+  .meter{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    box-shadow:var(--shadow);
+  }
+  .bars{display:flex;gap:4px;align-items:flex-end;flex:0 0 auto;}
+  .bars i{
+    display:block;width:8px;
+    background:var(--line);
+    border-radius:1px;
+    transition:background .35s ease;
+  }
+  .bars i:nth-child(1){height:11px}
+  .bars i:nth-child(2){height:16px}
+  .bars i:nth-child(3){height:21px}
+  .bars i:nth-child(4){height:26px}
+  .bars i:nth-child(5){height:31px}
+  .bars i.on{background:var(--accent);}
+  .bars.warn i.on{background:var(--hot);}
+  .meter-text{flex:1 1 auto;min-width:0;}
+  .meter-verdict{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:17px;
+    line-height:1.3;
+    display:block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .meter-sub{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.05em;
+  }
+  .pct{
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:26px;
+    font-variant-numeric:tabular-nums;
+    color:var(--accent);
+    flex:0 0 auto;
+  }
+  .pct.warn{color:var(--hot);}
+  .pct span{font-size:13px;color:var(--muted);margin-left:1px;}
+
+  .seed{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:7px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.03em;
+  }
+  .seed button{
+    font:inherit;
+    letter-spacing:.08em;
+    background:none;
+    border:1px solid var(--line-strong);
+    color:var(--ink-2);
+    border-radius:2px;
+    padding:4px 10px;
+    cursor:pointer;
+  }
+  .seed button:active{border-color:var(--accent);color:var(--accent);}
+  .delta{color:var(--accent);font-weight:600;}
+  .delta.down{color:var(--hot);}
+
+  /* ---------- hero ---------- */
+  .hero{padding-block:22px 24px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:9px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px;height:7px;border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 4px var(--accent-soft);
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(34px,8.2vw,54px);
+    line-height:1.05;
+    letter-spacing:-.02em;
+    margin:0 0 14px;
+    text-wrap:balance;
+  }
+  .lede{font-size:16px;color:var(--ink-2);margin:0;max-width:32em;}
+  .lede b{font-weight:600;color:var(--ink);}
+
+  /* ---------- 섹션 ---------- */
+  .group{margin-top:36px;}
+  .group-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--line-strong);
+    margin-bottom:4px;
+  }
+  .band{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    letter-spacing:.1em;
+    flex:0 0 auto;
+  }
+  .group-head h2{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:22px;
+    margin:0;
+    letter-spacing:-.01em;
+    flex:1 1 auto;
+  }
+  .gcount{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--muted);
+    font-variant-numeric:tabular-nums;
+    flex:0 0 auto;
+  }
+  .gcount.full{color:var(--accent);}
+  .group-note{font-size:13.5px;color:var(--muted);margin:10px 0 6px;}
+
+  .list{list-style:none;margin:0;padding:0;}
+  .list li{border-bottom:1px solid var(--line);}
+  .item{
+    display:flex;
+    align-items:flex-start;
+    gap:13px;
+    padding:13px 2px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  .item input{position:absolute;opacity:0;width:0;height:0;}
+  .box{
+    flex:0 0 auto;
+    width:20px;height:20px;
+    margin-top:3px;
+    border:1.5px solid var(--line-strong);
+    border-radius:2px;
+    background:var(--surface);
+    position:relative;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .box::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    margin:auto;
+    width:5px;height:9px;
+    border:solid var(--surface);
+    border-width:0 2px 2px 0;
+    transform:rotate(42deg) translate(-1px,-1px) scale(.4);
+    opacity:0;
+    transition:opacity .18s ease,transform .18s ease;
+  }
+  .item input:checked + .box{background:var(--accent);border-color:var(--accent);}
+  .item input:checked + .box::after{opacity:1;transform:rotate(42deg) translate(-1px,-1px) scale(1);}
+  .item input:focus-visible + .box{outline:2px solid var(--accent);outline-offset:3px;}
+  .txt{flex:1 1 auto;font-size:15.5px;line-height:1.55;color:var(--ink-2);transition:color .18s;}
+  .item input:checked ~ .txt{color:var(--ink);}
+  .w{flex:0 0 auto;margin-top:9px;display:flex;gap:3px;}
+  .w b{display:block;width:5px;height:5px;border-radius:50%;background:var(--line-strong);}
+  .item input:checked ~ .w b{background:var(--accent);}
+
+  .traps .item input:checked + .box{background:var(--hot);border-color:var(--hot);}
+  .traps .item input:checked ~ .w b{background:var(--hot);}
+  .traps .group-head{border-bottom-color:var(--hot);}
+  .traps .band{color:var(--hot);}
+  .traps .gcount.full{color:var(--hot);}
+
+  /* ---------- 결과 ---------- */
+  .result{
+    margin-top:44px;
+    background:var(--surface);
+    border:1px solid var(--line-strong);
+    border-top:3px solid var(--accent);
+    border-radius:3px;
+    padding:24px 22px;
+  }
+  .result.warn{border-top-color:var(--hot);}
+  .result .band{display:block;margin-bottom:12px;}
+  .result h3{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(24px,5.5vw,30px);
+    line-height:1.2;
+    margin:0 0 12px;
+    letter-spacing:-.01em;
+    text-wrap:balance;
+  }
+  .result p{margin:0;color:var(--ink-2);font-size:15.5px;}
+  .tally{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.05em;
+    color:var(--muted);
+  }
+  .tally em{font-style:normal;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;}
+  .actions{
+    margin-top:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .btn{
+    font-size:13.5px;
+    font-weight:500;
+    padding:9px 14px;
+    border-radius:3px;
+    border:1px solid var(--line-strong);
+    background:var(--surface-2);
+    color:var(--ink);
+    cursor:pointer;
+  }
+  .btn:active{background:var(--line);}
+  .btn-main{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:600;}
+  .btn-main:active{opacity:.85;background:var(--accent);}
+  .btn-danger{color:var(--hot);border-color:var(--hot);background:none;}
+
+  /* ---------- 메모 ---------- */
+  .card{
+    margin-top:20px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:18px 20px;
+  }
+  .card h2{
+    font-family:var(--serif);
+    font-size:18px;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .card .hint{font-size:13px;color:var(--muted);margin:0 0 12px;}
+  textarea{
+    width:100%;
+    min-height:88px;
+    resize:vertical;
+    font-family:inherit;
+    font-size:14.5px;
+    line-height:1.6;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:10px 12px;
+  }
+  textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+
+  /* ---------- 기록 ---------- */
+  .spark{display:block;width:100%;height:56px;margin:6px 0 12px;overflow:visible;}
+  .hist{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:12px;}
+  .hist li{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:7px 0;
+    border-top:1px solid var(--line);
+    color:var(--muted);
+    letter-spacing:.03em;
+  }
+  .hist li:first-child{border-top:none;}
+  .hist .hp{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums;min-width:3.4em;}
+  .hist .hd{flex:1 1 auto;}
+  .empty{font-size:13.5px;color:var(--muted);margin:0;}
+
+  /* ---------- 규칙 ---------- */
+  .rules{margin-top:40px;padding:22px;background:var(--surface-2);border-radius:3px;}
+  .rules h2{font-family:var(--serif);font-size:20px;font-weight:700;margin:0 0 14px;}
+  .rules ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14.5px;}
+  .rules li{margin-bottom:9px;}
+  .rules li:last-child{margin-bottom:0;}
+  .rules b{color:var(--ink);font-weight:600;}
+
+  footer{margin-top:32px;font-size:13px;color:var(--muted);line-height:1.7;}
+
+  /* ---------- 대화상자 ---------- */
+  dialog{
+    border:none;
+    border-radius:6px;
+    padding:0;
+    width:min(340px,calc(100vw - 40px));
+    background:var(--surface);
+    color:var(--ink);
+    box-shadow:var(--shadow-lift);
+  }
+  dialog::backdrop{background:rgba(0,0,0,.45);}
+  .sheet{padding:20px;}
+  .sheet h2{font-family:var(--serif);font-size:19px;margin:0 0 14px;font-weight:700;}
+  .sheet input[type="text"]{
+    width:100%;
+    font-family:inherit;
+    font-size:15px;
+    color:var(--ink);
+    background:var(--surface-2);
+    border:1px solid var(--line-strong);
+    border-radius:3px;
+    padding:10px 12px;
+  }
+  .sheet input:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  .sheet .row{display:flex;gap:8px;margin-top:16px;}
+  .sheet .row .btn{flex:1 1 auto;text-align:center;}
+  .sheet .sep{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);}
+  .themebtns{display:flex;gap:8px;}
+  .themebtns .btn{flex:1 1 0;text-align:center;}
+  .themebtns .btn[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);font-weight:600;}
+
+  /* ---------- 토스트 ---------- */
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:calc(24px + env(safe-area-inset-bottom));
+    transform:translateX(-50%) translateY(8px);
+    z-index:60;
+    background:var(--ink);
+    color:var(--ground);
+    font-size:13.5px;
+    padding:10px 16px;
+    border-radius:999px;
+    box-shadow:var(--shadow-lift);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease,transform .2s ease;
+    max-width:calc(100vw - 40px);
+    text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+  @media (max-width:420px){
+    .meter{gap:11px;padding:11px 12px;}
+    .pct{font-size:22px;}
+    .bars i{width:6px;}
+    .wrap{padding-inline:16px;}
+    .dock-inner{padding-inline:16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="dock">
+  <div class="dock-inner">
+    <div class="barrow">
+      <div class="chips" id="chips" role="group" aria-label="대상 선택"></div>
+      <button type="button" class="chip-add" id="addBtn" aria-label="대상 추가">+</button>
+      <button type="button" class="icon-btn" id="themeBtn" aria-label="화면 모드 바꾸기">◐</button>
+    </div>
+
+    <div class="meter">
+      <div class="bars" id="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="meter-text">
+        <strong class="meter-verdict" id="dockVerdict">수신 없음</strong>
+        <span class="meter-sub" id="dockSub">체크 0 · 함정 0</span>
+      </div>
+      <div class="pct" id="dockPct" aria-live="polite">0<span>%</span></div>
+    </div>
+
+    <div class="seed">
+      <span id="seedNote">실제로 본 것만 체크하세요</span>
+      <button type="button" id="resetBtn">이 대상 지우기</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">수신 중 · 호감 신호 체크리스트</p>
+    <h1>시그널 수신기</h1>
+    <p class="lede">그 사람이 보낸 신호일까, 그냥 잡음일까. 실제로 관찰한 것만 체크하세요. 점수가 높아도 <b>정답은 본인만 알고 있습니다.</b></p>
+  </header>
+
+  <section class="group">
+    <div class="group-head"><span class="band">A</span><h2>시선</h2><span class="gcount" data-count="A">0/5</span></div>
+    <p class="group-note">사람은 관심 있는 쪽을 본다. 가장 숨기기 어려운 신호라서 제일 먼저 본다.</p>
+    <ul class="list" data-group="A">
+      <li><label class="item"><input type="checkbox" id="a1" data-w="2"><span class="box"></span><span class="txt">대화 중 눈을 맞추는 시간이 다른 사람들과 있을 때보다 길다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="a2" data-w="3"><span class="box"></span><span class="txt">눈이 마주쳤을 때 급히 피하지 않고, 한 박자 뒤에 웃는다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="a3" data-w="3"><span class="box"></span><span class="txt">여럿이 있는 자리에서 웃음이 터지면 나를 먼저 쳐다본다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="a4" data-w="2"><span class="box"></span><span class="txt">시선이 눈에서 입으로, 다시 눈으로 짧게 움직인다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="a5" data-w="2"><span class="box"></span><span class="txt">약속 장소에 도착하면 내가 부르기 전에 나를 찾아낸다</span><span class="w"><b></b><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="group">
+    <div class="group-head"><span class="band">B</span><h2>몸의 방향과 거리</h2><span class="gcount" data-count="B">0/5</span></div>
+    <p class="group-note">사람마다 편하게 느끼는 개인 공간은 대략 45cm 안쪽. 그 선을 누가 먼저 넘는지를 본다.</p>
+    <ul class="list" data-group="B">
+      <li><label class="item"><input type="checkbox" id="b1" data-w="2"><span class="box"></span><span class="txt">앉았을 때 어깨·무릎·발끝이 나를 향해 있다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="b2" data-w="1"><span class="box"></span><span class="txt">가방이나 팔짱으로 몸 앞을 가리지 않는다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="b3" data-w="3"><span class="box"></span><span class="txt">먼저 가까이 다가오거나, 내 옆자리를 비워 둔다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="b4" data-w="2"><span class="box"></span><span class="txt">내 자세, 말투, 잔 드는 속도를 은근히 따라 한다 (미러링)</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="b5" data-w="2"><span class="box"></span><span class="txt">다른 사람이 끼어들면 몸이 나를 향한 채로 남는다</span><span class="w"><b></b><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="group">
+    <div class="group-head"><span class="band">C</span><h2>대화</h2><span class="gcount" data-count="C">0/5</span></div>
+    <p class="group-note">호감은 보통 "자기 이야기를 얼마나 먼저 꺼내는가"로 새어 나온다.</p>
+    <ul class="list" data-group="C">
+      <li><label class="item"><input type="checkbox" id="c1" data-w="3"><span class="box"></span><span class="txt">묻지 않은 개인적인 이야기를 먼저 꺼낸다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="c2" data-w="3"><span class="box"></span><span class="txt">내가 지나가듯 한 말을 다음에 만났을 때 기억하고 있다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="c3" data-w="2"><span class="box"></span><span class="txt">질문에 답한 뒤 같은 질문을 나에게 되돌려준다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="c4" data-w="2"><span class="box"></span><span class="txt">내 농담의 실제 재미보다 확실히 많이 웃는다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="c5" data-w="2"><span class="box"></span><span class="txt">대화가 끊기면 새 화제를 꺼내서 이어 붙인다</span><span class="w"><b></b><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="group">
+    <div class="group-head"><span class="band">D</span><h2>메신저</h2><span class="gcount" data-count="D">0/5</span></div>
+    <p class="group-note">답장 속도는 성격이나 일정에 더 가깝다. 속도보다 <b>모양</b>을 본다.</p>
+    <ul class="list" data-group="D">
+      <li><label class="item"><input type="checkbox" id="d1" data-w="2"><span class="box"></span><span class="txt">답장이 내가 보낸 메시지보다 길 때가 있다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="d2" data-w="3"><span class="box"></span><span class="txt">용건 없이 먼저 연락이 온다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="d3" data-w="3"><span class="box"></span><span class="txt">대화를 끝내지 않고 질문으로 마무리한다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="d4" data-w="3"><span class="box"></span><span class="txt">"언제 밥 한번"이 아니라 요일·장소가 들어간 제안을 한다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="d5" data-w="1"><span class="box"></span><span class="txt">내 SNS의 옛날 게시물까지 본 티가 난다</span><span class="w"><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="group">
+    <div class="group-head"><span class="band">E</span><h2>판을 만드는 신호</h2><span class="gcount" data-count="E">0/4</span></div>
+    <p class="group-note">가장 무겁다. 마음보다 일정과 사람을 움직이는 건 훨씬 큰 결심이라서.</p>
+    <ul class="list" data-group="E">
+      <li><label class="item"><input type="checkbox" id="e1" data-w="3"><span class="box"></span><span class="txt">둘만 남는 상황을 피하지 않거나, 자연스럽게 만든다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="e2" data-w="3"><span class="box"></span><span class="txt">자기 친구들이 이미 내 이야기를 알고 있다</span><span class="w"><b></b><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="e3" data-w="2"><span class="box"></span><span class="txt">내 주말이나 다음 일정을 먼저 물어본다</span><span class="w"><b></b><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="e4" data-w="1"><span class="box"></span><span class="txt">한번 잡은 약속을 잘 미루지 않는다</span><span class="w"><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="group traps">
+    <div class="group-head"><span class="band">X</span><h2>착각하기 쉬운 것들</h2><span class="gcount" data-count="X">0/6</span></div>
+    <p class="group-note">여기 해당되면 위 신호의 신뢰도가 확 떨어진다. 정직하게 체크할수록 결과가 쓸모 있어진다.</p>
+    <ul class="list" data-group="X">
+      <li><label class="item"><input type="checkbox" id="x1" data-trap="1"><span class="box"></span><span class="txt">원래 누구에게나 다정하고 잘 웃는 사람이다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="x2" data-trap="1"><span class="box"></span><span class="txt">직장·학교·거래처처럼 나를 챙겨야 하는 관계다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="x3" data-trap="1"><span class="box"></span><span class="txt">가까워지는 건 술자리에서뿐이다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="x4" data-trap="1"><span class="box"></span><span class="txt">연락은 거의 항상 내가 먼저 시작한다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="x5" data-trap="1"><span class="box"></span><span class="txt">만나자는 이야기는 매번 다음으로 미뤄진다</span><span class="w"><b></b></span></label></li>
+      <li><label class="item"><input type="checkbox" id="x6" data-trap="1"><span class="box"></span><span class="txt">나에게 다른 사람 연애 상담을 한다</span><span class="w"><b></b></span></label></li>
+    </ul>
+  </section>
+
+  <section class="result" id="result">
+    <span class="band" id="resBand">수신 강도 0%</span>
+    <h3 id="resTitle">수신 없음</h3>
+    <p id="resBody">아직 체크된 게 없습니다.</p>
+    <div class="tally">
+      <span>체크 <em id="tCount">0</em>개</span>
+      <span>신호 점수 <em id="tScore">0</em>/55</span>
+      <span>함정 <em id="tTrap">0</em>개</span>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-main" id="saveBtn">오늘 상태 기록</button>
+      <button type="button" class="btn" id="copyBtn">결과 복사</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>메모</h2>
+    <p class="hint">기억은 금방 유리해집니다. 실제로 있었던 장면을 짧게 적어 두세요.</p>
+    <textarea id="memo" placeholder="예) 9/14 — 카페에서 먼저 옆자리 비워 뒀음. 다만 그날 사람이 많았음." aria-label="메모"></textarea>
+  </section>
+
+  <section class="card">
+    <h2>기록</h2>
+    <p class="hint">한 번의 점수보다 <b>방향</b>이 정확합니다. 만나고 난 뒤에 한 번씩 남겨 두세요.</p>
+    <svg class="spark" id="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true" hidden></svg>
+    <ul class="hist" id="hist"></ul>
+    <p class="empty" id="histEmpty">아직 남긴 기록이 없습니다. 위의 <b>오늘 상태 기록</b>을 누르면 여기에 쌓입니다.</p>
+  </section>
+
+  <section class="rules">
+    <h2>점수보다 중요한 것</h2>
+    <ul>
+      <li><b>신호는 확률이지 허락이 아닙니다.</b> 100%가 나와도 그건 "물어봐도 될 것 같다"까지지, 그 이상이 아닙니다.</li>
+      <li>확인하는 방법은 하나뿐입니다. <b>정중하게, 한 번, 직접 묻기.</b> 신호 해석을 백 번 하는 것보다 정확합니다.</li>
+      <li>거절은 해석 대상이 아닙니다. <b>"바빠서"도 거절입니다.</b> 다시 시험하지 않는 게 서로에게 좋습니다.</li>
+      <li>상하관계나 업무로 엮인 사이라면 상대가 편하게 거절할 수 없습니다. 이 표는 그런 관계에선 쓰지 마세요.</li>
+      <li>체크가 적게 나왔다고 그 사람이 나쁜 게 아니고, 많이 나왔다고 내 것이 되는 것도 아닙니다.</li>
+      <li>여기 적은 내용은 <b>이 폰 안에만</b> 저장됩니다. 그래도 남의 이야기입니다. 이름 대신 별명을 쓰는 편이 안전합니다.</li>
+    </ul>
+  </section>
+
+  <footer>
+    이 체크리스트는 시선·자세·자기공개 같은 흔히 이야기되는 행동 단서를 재미 삼아 정리한 것입니다. 사람의 마음을 측정하는 도구가 아니고, 정확도를 보장하지도 않습니다. 궁금하면 물어보세요.
+  </footer>
+
+</div>
+
+<dialog id="personDlg">
+  <form method="dialog" class="sheet" id="personForm">
+    <h2 id="dlgTitle">대상 추가</h2>
+    <input type="text" id="nameInput" maxlength="20" placeholder="별명 (예: 카페 그 사람)" aria-label="대상 이름">
+    <div class="row">
+      <button type="button" class="btn" id="dlgCancel">취소</button>
+      <button type="button" class="btn btn-main" id="dlgSave">저장</button>
+    </div>
+    <div class="sep" id="dlgDangerWrap">
+      <button type="button" class="btn btn-danger" id="dlgDelete" style="width:100%">이 대상 삭제</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="themeDlg">
+  <div class="sheet">
+    <h2>화면 모드</h2>
+    <div class="themebtns" id="themeBtns">
+      <button type="button" class="btn" data-theme-value="system">시스템</button>
+      <button type="button" class="btn" data-theme-value="light">밝게</button>
+      <button type="button" class="btn" data-theme-value="dark">어둡게</button>
+    </div>
+    <div class="row">
+      <button type="button" class="btn" id="themeClose" style="width:100%">닫기</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var MAX = 55;
+  var STORE = "signal-receiver.v1";
+  var SEED = ["a2","a3","b1","c2","d2","d3"];
+
+  var BANDS = [
+    {min:85, title:"수신 양호", body:"여기까지 왔으면 더 관찰할 게 없습니다. 남은 건 이 표를 닫고 본인에게 직접 물어보는 일뿐이에요. 늦출수록 애매해집니다."},
+    {min:65, title:"강한 신호", body:"우연으로 설명하기 어려운 것들이 겹쳐 있습니다. 다음 약속을 요일과 장소까지 넣어서 먼저 제안해 보세요. 거절하기 편한 방식으로."},
+    {min:45, title:"신호 잡힘", body:"호감 쪽으로 기울어 있지만 확신할 단계는 아닙니다. 둘이서만 만나는 자리를 한 번 만들어 보고, 그때 어떻게 나오는지가 답에 가깝습니다."},
+    {min:25, title:"약한 신호", body:"호감일 수도, 원래 다정한 사람일 수도 있는 구간입니다. 조급하게 결론 내리지 말고 몇 번 더 겪어 보세요. 그동안 내 쪽에서 편한 사람이 되는 게 제일 효율이 좋습니다."},
+    {min:1,  title:"거의 잡음", body:"지금 근거로는 호감이라고 보기 어렵습니다. 그렇다고 가능성이 0인 것도 아니니, 해석 말고 그냥 사람 대 사람으로 잘 지내 보는 쪽을 권합니다."},
+    {min:0,  title:"수신 없음", body:"아직 체크된 게 없습니다. 기억으로 짐작하지 말고, 다음에 만났을 때 실제로 본 것만 체크해 보세요."}
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  // hidden 프로퍼티는 HTMLElement 에만 있습니다. <svg> 에도 통하도록 속성으로 다룹니다.
+  function show(el, on){ if(on) el.removeAttribute('hidden'); else el.setAttribute('hidden',''); }
+  var positives = [].slice.call(document.querySelectorAll('input[data-w]'));
+  var traps = [].slice.call(document.querySelectorAll('input[data-trap]'));
+  var all = positives.concat(traps);
+  var groups = [].slice.call(document.querySelectorAll('.list[data-group]'));
+
+  var bars = $('bars'), barEls = bars.getElementsByTagName('i');
+  var chips = $('chips'), toastEl = $('toast');
+  var personDlg = $('personDlg'), themeDlg = $('themeDlg');
+  var nameInput = $('nameInput'), memoEl = $('memo');
+
+  /* ---------- 네이티브 다리 (앱일 때만 동작, 브라우저에서는 조용히 무시) ---------- */
+  var cap = window.Capacitor || {};
+  var plugins = cap.Plugins || {};
+  function tap(style){
+    try{ plugins.Haptics && plugins.Haptics.impact({ style: style || 'LIGHT' }); }catch(e){}
+  }
+
+  /* ---------- 저장소 ---------- */
+  function uid(){ return 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+  function blank(name){
+    return { id: uid(), name: name, checked: {}, memo: "", history: [] };
+  }
+
+  function fresh(){
+    var p = blank("그 사람");
+    SEED.forEach(function(id){ p.checked[id] = true; });
+    return { theme: "system", activeId: p.id, people: [p], seeded: true };
+  }
+
+  function load(){
+    var raw;
+    try{ raw = localStorage.getItem(STORE); }catch(e){ raw = null; }
+    if(!raw) return fresh();
+    try{
+      var s = JSON.parse(raw);
+      if(!s || !Array.isArray(s.people) || !s.people.length) return fresh();
+      s.people = s.people.map(function(p){
+        return {
+          id: p.id || uid(),
+          name: String(p.name || "이름 없음").slice(0,20),
+          checked: (p.checked && typeof p.checked === 'object') ? p.checked : {},
+          memo: String(p.memo || ""),
+          history: Array.isArray(p.history) ? p.history.slice(-40) : []
+        };
+      });
+      if(!s.people.some(function(p){ return p.id === s.activeId; })) s.activeId = s.people[0].id;
+      if(["system","light","dark"].indexOf(s.theme) < 0) s.theme = "system";
+      return s;
+    }catch(e){ return fresh(); }
+  }
+
+  var state = load();
+  var saveTimer = null;
+  function save(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function(){
+      try{ localStorage.setItem(STORE, JSON.stringify(state)); }
+      catch(e){ toast("저장에 실패했습니다 (저장 공간 확인)"); }
+    }, 180);
+  }
+
+  function active(){
+    for(var i=0;i<state.people.length;i++){
+      if(state.people[i].id === state.activeId) return state.people[i];
+    }
+    return state.people[0];
+  }
+
+  /* ---------- 계산 ---------- */
+  function tallyOf(person){
+    var score = 0, count = 0, trapCount = 0;
+    positives.forEach(function(el){
+      if(person.checked[el.id]){ score += parseInt(el.dataset.w,10); count++; }
+    });
+    traps.forEach(function(el){ if(person.checked[el.id]) trapCount++; });
+    var pct = Math.round(score / MAX * 100) - trapCount * 8;
+    if(pct < 0 || score === 0) pct = 0;
+    return { score: score, count: count, traps: trapCount, pct: pct };
+  }
+
+  function bandOf(pct){
+    for(var i=0;i<BANDS.length;i++){ if(pct >= BANDS[i].min) return BANDS[i]; }
+    return BANDS[BANDS.length-1];
+  }
+
+  /* ---------- 그리기 ---------- */
+  function applyTheme(){
+    var t = state.theme;
+    if(t === 'system') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    var dark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', dark ? '#0D1514' : '#E7ECEA');
+    [].slice.call(document.querySelectorAll('#themeBtns .btn')).forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.dataset.themeValue === t));
+    });
+  }
+
+  function drawChips(){
+    chips.innerHTML = '';
+    state.people.forEach(function(p){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.id = p.id;
+      var on = p.id === state.activeId;
+      b.setAttribute('aria-pressed', String(on));
+      b.textContent = on ? p.name + ' ✎' : p.name;
+      chips.appendChild(b);
+    });
+    var cur = chips.querySelector('[aria-pressed="true"]');
+    if(cur && cur.scrollIntoView) cur.scrollIntoView({ block:'nearest', inline:'nearest' });
+  }
+
+  function drawBoxes(){
+    var p = active();
+    all.forEach(function(el){ el.checked = !!p.checked[el.id]; });
+    memoEl.value = p.memo;
+  }
+
+  function drawHistory(){
+    var h = active().history;
+    var list = $('hist'), empty = $('histEmpty'), spark = $('spark');
+    list.innerHTML = '';
+    if(!h.length){ show(empty, true); show(spark, false); return; }
+    show(empty, false);
+
+    var pts = h.slice(-20);
+    if(pts.length >= 2){
+      var w = 300, hh = 56, pad = 5;
+      var vals = pts.map(function(r){ return Math.min(100, Math.max(0, r.pct)); });
+      // 0~100 을 통째로 그리면 변화가 납작해집니다. 실제 값 범위에 맞추되,
+      // 한두 칸 차이가 절벽처럼 보이지 않게 최소 25%p 폭은 유지합니다.
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      var mid = (lo + hi) / 2, span = Math.max(25, hi - lo + 10);
+      lo = Math.max(0, mid - span/2); hi = Math.min(100, lo + span);
+      lo = Math.max(0, hi - span);
+      var step = (w - pad*2) / (pts.length - 1);
+      var coords = vals.map(function(v,i){
+        var y = pad + (1 - (v - lo) / (hi - lo)) * (hh - pad*2);
+        return (pad + i*step).toFixed(1) + ',' + y.toFixed(1);
+      });
+      // 색은 presentation attribute 가 아니라 인라인 style 로 넣습니다 —
+      // SVG 속성 자리에서는 var() 가 풀리지 않습니다.
+      var color = pts[pts.length-1].traps >= 3 ? 'var(--hot)' : 'var(--accent)';
+      var last = coords[coords.length-1].split(',');
+      spark.innerHTML =
+        '<polygon points="' + coords[0].split(',')[0] + ',56 ' + coords.join(' ') + ' ' +
+        last[0] + ',56" style="fill:' + color + ';opacity:.10"/>' +
+        '<polyline points="' + coords.join(' ') + '" vector-effect="non-scaling-stroke" ' +
+        'style="fill:none;stroke:' + color + ';stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>' +
+        '<circle cx="' + last[0] + '" cy="' + last[1] + '" r="3" vector-effect="non-scaling-stroke" ' +
+        'style="fill:' + color + '"/>';
+      show(spark, true);
+    } else {
+      show(spark, false);
+    }
+
+    h.slice().reverse().slice(0,8).forEach(function(r,i,arr){
+      var d = new Date(r.t);
+      var li = document.createElement('li');
+      var prev = arr[i+1];
+      var diff = prev ? r.pct - prev.pct : null;
+      var diffTxt = diff === null ? '' : (diff > 0 ? '▲' + diff : (diff < 0 ? '▼' + Math.abs(diff) : '—'));
+      li.innerHTML =
+        '<span class="hp">' + r.pct + '%</span>' +
+        '<span class="hd">' + (d.getMonth()+1) + '/' + d.getDate() + ' · 체크 ' + r.count + ' · 함정 ' + r.traps + '</span>' +
+        '<span>' + diffTxt + '</span>';
+      list.appendChild(li);
+    });
+  }
+
+  function update(){
+    var p = active();
+    var t = tallyOf(p);
+    var band = bandOf(t.pct);
+    var warn = t.traps >= 3;
+
+    var lit = Math.ceil(t.pct / 20);
+    for(var i=0;i<barEls.length;i++) barEls[i].className = i < lit ? 'on' : '';
+    bars.className = 'bars' + (warn ? ' warn' : '');
+    $('dockPct').className = 'pct' + (warn ? ' warn' : '');
+    $('result').className = 'result' + (warn ? ' warn' : '');
+
+    $('dockPct').innerHTML = t.pct + '<span>%</span>';
+    $('dockVerdict').textContent = band.title;
+    $('dockSub').textContent = '체크 ' + t.count + ' · 함정 ' + t.traps;
+
+    var last = p.history.length ? p.history[p.history.length-1] : null;
+    if(last){
+      var diff = t.pct - last.pct;
+      $('seedNote').innerHTML = diff === 0
+        ? '지난 기록과 같습니다'
+        : '지난 기록보다 <span class="delta' + (diff < 0 ? ' down' : '') + '">' +
+          (diff > 0 ? '+' : '') + diff + '%p</span>';
+    } else {
+      $('seedNote').textContent = state.seeded ? '예시로 6개를 체크해 뒀어요' : '실제로 본 것만 체크하세요';
+    }
+
+    $('resBand').textContent = '수신 강도 ' + t.pct + '%';
+    $('resTitle').textContent = band.title;
+    $('resBody').textContent = warn
+      ? band.body + ' 다만 아래 함정 항목이 ' + t.traps + '개 걸려 있어서, 위의 신호들은 상당 부분 그쪽으로 설명될 수 있습니다.'
+      : band.body;
+
+    $('tCount').textContent = t.count;
+    $('tScore').textContent = t.score;
+    $('tTrap').textContent = t.traps;
+
+    groups.forEach(function(ul){
+      var boxes = [].slice.call(ul.querySelectorAll('input'));
+      var on = boxes.filter(function(el){ return el.checked; }).length;
+      var label = document.querySelector('.gcount[data-count="' + ul.dataset.group + '"]');
+      if(label){
+        label.textContent = on + '/' + boxes.length;
+        label.className = 'gcount' + (on === boxes.length ? ' full' : '');
+      }
+    });
+
+    return t;
+  }
+
+  function renderAll(){
+    applyTheme();
+    drawChips();
+    drawBoxes();
+    drawHistory();
+    update();
+  }
+
+  /* ---------- 토스트 ---------- */
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  /* ---------- 이벤트 ---------- */
+  all.forEach(function(el){
+    el.addEventListener('change', function(){
+      var p = active();
+      if(el.checked) p.checked[el.id] = true; else delete p.checked[el.id];
+      state.seeded = false;
+      tap(el.dataset.trap ? 'MEDIUM' : 'LIGHT');
+      save();
+      update();
+    });
+  });
+
+  memoEl.addEventListener('input', function(){
+    active().memo = memoEl.value;
+    save();
+  });
+
+  $('resetBtn').addEventListener('click', function(){
+    var p = active();
+    p.checked = {};
+    state.seeded = false;
+    all.forEach(function(el){ el.checked = false; });
+    save();
+    update();
+    toast('"' + p.name + '" 의 체크를 모두 지웠습니다');
+  });
+
+  $('saveBtn').addEventListener('click', function(){
+    var p = active();
+    var t = tallyOf(p);
+    var last = p.history.length ? p.history[p.history.length-1] : null;
+    p.history.push({ t: Date.now(), pct: t.pct, score: t.score, count: t.count, traps: t.traps });
+    if(p.history.length > 40) p.history = p.history.slice(-40);
+    save();
+    drawHistory();
+    update();
+    tap('MEDIUM');
+    toast(last ? '기록했습니다 · 지난번 ' + last.pct + '% → ' + t.pct + '%' : '첫 기록을 남겼습니다 · ' + t.pct + '%');
+  });
+
+  $('copyBtn').addEventListener('click', function(){
+    var p = active();
+    var t = tallyOf(p);
+    var band = bandOf(t.pct);
+    var text = [
+      '시그널 수신기 — ' + p.name,
+      '수신 강도 ' + t.pct + '% · ' + band.title,
+      '체크 ' + t.count + '개 / 신호 ' + t.score + '/' + MAX + ' / 함정 ' + t.traps + '개',
+      '',
+      band.body
+    ].join('\n');
+    copy(text).then(function(ok){
+      toast(ok ? '결과를 복사했습니다' : '복사할 수 없었습니다');
+    });
+  });
+
+  function copy(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text).then(function(){ return true; }, function(){ return legacyCopy(text); });
+    }
+    return Promise.resolve(legacyCopy(text));
+  }
+  function legacyCopy(text){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly','');
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    }catch(e){ return false; }
+  }
+
+  /* ---------- 대상 관리 ---------- */
+  var editingId = null;
+
+  function openPerson(id){
+    editingId = id;
+    var isNew = !id;
+    $('dlgTitle').textContent = isNew ? '대상 추가' : '대상 수정';
+    nameInput.value = isNew ? '' : (state.people.filter(function(p){return p.id===id;})[0] || {}).name || '';
+    show($('dlgDangerWrap'), !isNew && state.people.length > 1);
+    $('dlgDelete').textContent = '이 대상 삭제';
+    personDlg.showModal();
+    setTimeout(function(){ nameInput.focus(); }, 50);
+  }
+
+  chips.addEventListener('click', function(e){
+    var chip = e.target.closest('.chip');
+    if(!chip) return;
+    if(chip.dataset.id === state.activeId){ openPerson(chip.dataset.id); return; }
+    state.activeId = chip.dataset.id;
+    state.seeded = false;
+    save();
+    renderAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    tap('LIGHT');
+  });
+
+  $('addBtn').addEventListener('click', function(){ openPerson(null); });
+  $('dlgCancel').addEventListener('click', function(){ personDlg.close(); });
+
+  $('dlgSave').addEventListener('click', function(){
+    var name = nameInput.value.trim().slice(0,20) || '이름 없음';
+    if(editingId){
+      state.people.forEach(function(p){ if(p.id === editingId) p.name = name; });
+    } else {
+      var p = blank(name);
+      state.people.push(p);
+      state.activeId = p.id;
+      state.seeded = false;
+    }
+    save();
+    personDlg.close();
+    renderAll();
+  });
+
+  var deleteArmed = false;
+  $('dlgDelete').addEventListener('click', function(){
+    if(!deleteArmed){
+      deleteArmed = true;
+      this.textContent = '한 번 더 누르면 삭제됩니다';
+      setTimeout(function(){ deleteArmed = false; $('dlgDelete').textContent = '이 대상 삭제'; }, 3000);
+      return;
+    }
+    var gone = editingId;
+    state.people = state.people.filter(function(p){ return p.id !== gone; });
+    if(!state.people.length) state.people.push(blank('그 사람'));
+    state.activeId = state.people[0].id;
+    deleteArmed = false;
+    save();
+    personDlg.close();
+    renderAll();
+    toast('삭제했습니다');
+  });
+
+  personDlg.addEventListener('close', function(){
+    deleteArmed = false;
+    $('dlgDelete').textContent = '이 대상 삭제';
+  });
+
+  /* ---------- 화면 모드 ---------- */
+  $('themeBtn').addEventListener('click', function(){ themeDlg.showModal(); });
+  $('themeClose').addEventListener('click', function(){ themeDlg.close(); });
+  $('themeBtns').addEventListener('click', function(e){
+    var b = e.target.closest('[data-theme-value]');
+    if(!b) return;
+    state.theme = b.dataset.themeValue;
+    save();
+    applyTheme();
+    drawHistory();
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
+    if(state.theme === 'system') applyTheme();
+  });
+
+  /* ---------- 안드로이드 뒤로가기 ---------- */
+  var exitArmed = false;
+  try{
+    plugins.App && plugins.App.addListener('backButton', function(){
+      if(personDlg.open){ personDlg.close(); return; }
+      if(themeDlg.open){ themeDlg.close(); return; }
+      if(window.scrollY > 320){ window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      if(!exitArmed){
+        exitArmed = true;
+        toast('한 번 더 누르면 앱이 닫힙니다');
+        setTimeout(function(){ exitArmed = false; }, 1800);
+        return;
+      }
+      try{ plugins.App.exitApp(); }catch(e){}
+    });
+  }catch(e){}
+
+  renderAll();
+})();
+</script>
+
+</body>
+</html>

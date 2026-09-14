@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="시그널 수신기">
+  <rect width="512" height="512" rx="114" fill="#0C2B25"/>
+  <g fill="#3FD6B0">
+    <rect x="92"  y="330" width="52" height="70"  rx="16"/>
+    <rect x="164" y="280" width="52" height="120" rx="16"/>
+    <rect x="236" y="230" width="52" height="170" rx="16"/>
+    <rect x="308" y="180" width="52" height="220" rx="16" opacity=".28"/>
+    <rect x="380" y="130" width="52" height="270" rx="16" opacity=".28"/>
+  </g>
+</svg>
